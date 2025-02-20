@@ -30,13 +30,14 @@ void rotateAndCapture(float weight) {
      * cout << "Captured image at position " << angle << endl;
      */
     LOG(INFO) << "Capturing at position " << angle;
-    takePhotos(angle);
+    // takePhotos(angle);    // This function is for both cameras
+    takePhoto(angle); // This function is for one camera/testing
     if (angle == 0) {
       sendDataToVision(weight);
     }
     LOG(INFO) << "Rotating platform...";
     rotateMotor();
-    usleep(2000);
+    usleep(200);
 
     bool stopSignal = false;
     if (read(pipes.visionToHardware[READ], &stopSignal, sizeof(stopSignal)) > 0 &&
@@ -49,26 +50,4 @@ void rotateAndCapture(float weight) {
       continue;
     }
   }
-}
-
-/**
- * This is a placeholder function for the redoThis function in hardware_entry.cpp.
- */
-void redoThis(struct Pipes pipes) {
-  LOG(INFO) << "Sending Images from Hardware to Vision";
-  // sendImagesWithinDirectory(pipes.toVision[WRITE], "../images/");
-
-  struct FoodItem foodItem;
-  foodItem.photoPath = "../images/apple.jpg";
-  foodItem.name      = "Apple";
-  const std::chrono::time_point<std::chrono::system_clock> now{
-      std::chrono::system_clock::now()};
-  foodItem.scanDate       = std::chrono::time_point_cast<std::chrono::days>(now);
-  foodItem.expirationDate = std::chrono::time_point_cast<std::chrono::days>(now);
-  foodItem.catagory       = "fruit";
-  foodItem.weight         = 10.0;
-  foodItem.quantity       = 2;
-
-  sendFoodItem(foodItem, pipes.hardwareToVision[WRITE]);
-  LOG(INFO) << "Done Sending Images from Hardware to Vision";
 }

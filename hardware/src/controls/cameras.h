@@ -4,6 +4,6 @@
 #include <string>
 
 void takePhotos(int angle);
-void takePic(char* filename);
+void takePhoto(int angle);
 
 #endif
