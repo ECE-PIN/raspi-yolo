@@ -4,7 +4,7 @@
 #include <string>
 #include <unistd.h>
 
-#include "../../../../WiringPi/wiringPi/wiringPi.h"
+#include "../../../WiringPi/wiringPi/wiringPi.h"
 #include "HX711.h"
 
 #define LOAD_CELL_DOUT 6 // HX711 Data pin

@@ -1,6 +1,5 @@
 # Hardware Errata
 
-
 ## rpi camera
 ```plaintext
 https://www.raspberrypi.com/documentation/computers/camera_software.html

@@ -4,7 +4,7 @@
 #include <string>
 #include <unistd.h>
 
-#include "../../../../WiringPi/wiringPi/wiringPi.h"
+#include "../../../WiringPi/wiringPi/wiringPi.h"
 
 #define MOTOR_IN1 23 // GPIO Pin for L298N IN1
 #define MOTOR_IN2 24 // GPIO Pin for L298N IN2
