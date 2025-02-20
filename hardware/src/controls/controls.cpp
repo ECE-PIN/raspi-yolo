@@ -48,7 +48,6 @@ void rotateAndCapture(float weight) {
       LOG(INFO) << "AI Vision did not identify item. Continuing process.";
       continue;
     }
-    }
   }
 }
 
