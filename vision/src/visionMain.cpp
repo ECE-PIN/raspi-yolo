@@ -38,7 +38,7 @@ void visionEntry(struct Pipes pipes) {
     LOG(INFO) << "Waiting for start signal from Hardware";
     std::cout << "waiting for start sig from hardware" << std::endl;
     if (receiveFoodItem(foodItem, pipes.hardwareToVision[READ], (struct timeval){1, 0})) {
-	    std::cout << "start sig received" << std::endl;
+      std::cout << "start sig received" << std::endl;
       LOG(INFO) << "Vision Received all images from hardware";
       processor.setFoodItem(foodItem);
       processor.process();

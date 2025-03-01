@@ -29,10 +29,9 @@ void DisplayHandler::handleExternal() {
   bool foodItemReceived = false;
   foodItemReceived =
       receiveFoodItem(foodItem, this->externalPipes.visionToDisplay[READ], timeout);
-  
 
   if (foodItemReceived) {
-	  std::cout << "food item received on display" << std::endl;
+    std::cout << "food item received on display" << std::endl;
     LOG(INFO) << "Food item received from vision";
     sqlite3* database = nullptr;
     openDatabase(&database);

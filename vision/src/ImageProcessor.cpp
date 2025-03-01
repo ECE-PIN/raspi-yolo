@@ -74,7 +74,7 @@ bool ImageProcessor::analyze() {
       try {
         std::filesystem::remove(entry.path());
         LOG(INFO) << "Deleted unclassified image: " << entry.path();
-	std::cout << "pic deleted" << std::endl;
+        std::cout << "pic deleted" << std::endl;
       } catch (const std::filesystem::filesystem_error& e) {
         LOG(ERROR) << "Failed to delete image: " << entry.path() << " - " << e.what();
       }

@@ -63,8 +63,6 @@ void sendDataToVision(int pipeToWrite, float weight) {
   foodItem.weight         = weight;
   sendFoodItem(foodItem, pipeToWrite);
 
-
-
   LOG(INFO) << "Done Sending Images from Hardware to Vision";
 }
 

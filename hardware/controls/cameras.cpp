@@ -73,7 +73,8 @@ void takePhotos(int angle) {
  * @return None - can add a 0 or -1 for success/failure
  */
 bool takePhoto(int angle) {
-std::string fileName = "/home/geromy/Desktop/Project/raspi-yolo/images/temp/IMG_2002.JPG";
+  std::string fileName =
+      "/home/geromy/Desktop/Project/raspi-yolo/images/temp/IMG_2002.JPG";
 
   pid_t pid = fork();
   if (pid == -1) {
@@ -85,18 +86,19 @@ std::string fileName = "/home/geromy/Desktop/Project/raspi-yolo/images/temp/IMG_
     google::ShutdownGoogleLogging();
     google::InitGoogleLogging("takePhotoChild");
     LOG(INFO) << "Capturing at position " << angle;
-    char* args[] = {(char*)"/usr/bin/rpicam-jpeg",
-                    (char*)"rpicam-jpeg",
-                    (char*)"1920:1080:12:U", // 1920x1080, 12MP, unpacked
-                    (char*)"--nopreview",
-                    (char*)"--output",
-                    (char*)fileName.c_str(), // Save location
-                    nullptr};
-    const char* arg = "rpicam-jpeg --output /home/geromy/Desktop/Project/raspi-yolo/images/temp/test.jpg";
+    char* args[]    = {(char*)"/usr/bin/rpicam-jpeg",
+                       (char*)"rpicam-jpeg",
+                       (char*)"1920:1080:12:U", // 1920x1080, 12MP, unpacked
+                       (char*)"--nopreview",
+                       (char*)"--output",
+                       (char*)fileName.c_str(), // Save location
+                       nullptr};
+    const char* arg = "rpicam-jpeg --output "
+                      "/home/geromy/Desktop/Project/raspi-yolo/images/temp/test.jpg";
     std::cout << "here" << std::endl;
-    //execl("rpicam-jpeg", arg);
+    // execl("rpicam-jpeg", arg);
     system(arg);
-//      sendDataToVision(pipes.hardwareToVision[WRITE], weight);
+    //      sendDataToVision(pipes.hardwareToVision[WRITE], weight);
     LOG(INFO) << "ERROR: execvp() failed to capture image.";
     exit(1);
   }

@@ -76,7 +76,7 @@ void rotateAndCapture(struct Pipes pipes, float weight) {
     }; // This function is for one camera/testing
 
     if (angle == 0) {
-	    sleep(10);
+      sleep(10);
       sendDataToVision(pipes.hardwareToVision[WRITE], weight);
     }
 
@@ -88,7 +88,7 @@ void rotateAndCapture(struct Pipes pipes, float weight) {
     bool stopSignal = false;
     if (read(pipes.visionToHardware[READ], &stopSignal, sizeof(stopSignal)) > 0 &&
         stopSignal) {
-	    std::cout << "AI Vision identified item. Stopping process." << std::endl;
+      std::cout << "AI Vision identified item. Stopping process." << std::endl;
       LOG(INFO) << "AI Vision identified item. Stopping process.";
       break;
     }
