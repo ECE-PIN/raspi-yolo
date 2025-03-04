@@ -23,7 +23,7 @@ valid_food_classes = {
 }
 
 food_labels = {
-    924: "guacamole", 925: "consomme", 926: "hot_pot", 927: "trifle",
+    924: "guacamole", 925: "consomme", 927: "trifle",
     928: "ice_cream", 929: "ice_lolly", 930: "French_loaf", 931: "bagel",
     932: "pretzel", 933: "cheeseburger", 934: "hotdog", 935: "mashed_potato",
     936: "head_cabbage", 937: "broccoli", 938: "cauliflower", 939: "zucchini",
@@ -31,9 +31,9 @@ food_labels = {
     943: "cucumber", 944: "artichoke", 945: "bell_pepper", 946: "cardoon",
     947: "mushroom", 948: "Granny_Smith", 949: "strawberry", 950: "orange",
     951: "lemon", 952: "fig", 953: "pineapple", 954: "banana", 955: "jackfruit",
-    956: "custard_apple", 957: "pomegranate", 959: "carbonara", 960: "chocolate_sauce",
+    956: "custard_apple", 957: "pomegranate", 960: "chocolate_sauce",
     961: "dough", 962: "meat_loaf", 963: "pizza", 964: "potpie", 965: "burrito",
-    966: "red_wine", 967: "espresso", 968: "cup", 969: "eggnog"
+    966: "red_wine", 967: "espresso", 969: "eggnog"
 }
 
 def preprocess_image(image_path):
