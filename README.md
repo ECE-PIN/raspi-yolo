@@ -17,50 +17,13 @@ for controlling all hardware components such as the cameras, weight sensor, and 
 - Logan Pelkey (Software, Vision)
 - Joe Dahms (Software Display)
 
-# Setup instructions
+# Setup 
+$ sudo chmod 777 install.sh
+$ ./install.sh \
 
-## Install necessary dependencies
-#### Refresh local package information:
-$ sudo apt update
-#### Install build tools
-$ sudo apt install make g++ cmake
-#### Install Google logging library
-$ sudo apt install libgoogle-glog-dev
-#### Install SDL
-$ sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev  
-#### Install OPENCV
-$ sudo apt install libopencv-dev
-#### Install SQLite
-$ sudo apt install sqlite3 libsqlite3-dev
-#### Install mesa
-$ sudo add-apt-repository ppa:kisak/kisak-mesa
-#### Install zeroMQ
-$ sudo apt-get install libzmq3-dev\
-$ git clone https://github.com/zeromq/zmqpp.git \
-$ cd zmqpp\
-$ mkdir build && cd build\
-$ cmake ..\
-$ make\
-$ sudo make install
-#### Install Protobuf
-$ sudo apt install protobuf-compiler libprotobuf-dev
-
-
-## Setup Python virual environment
-NOTE: To setup the Python virtual environment you must be in the build directory. Run all pip commands within the 
-build directory.
-#### Create the virtual environment
-$ python3 -m venv models-venv
-#### Activate it
+# Usage
 $ source models-venv/bin/activate
-#### Install EasyOCR
-$ pip install easyocr
-#### Install Efficientnett
-$ pip install efficientnet
-#### Install Tensorflow
-$ pip install tensorflow
-#### Install zeroMQ
-$ pip install pyzmq
+$ ./expirationTracker
 
 # Developer Notes
 ## Function Comment Format (javadoc)
