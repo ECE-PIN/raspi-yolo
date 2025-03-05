@@ -66,19 +66,6 @@ bool ImageProcessor::analyze() {
           return true;
         }
       }
-      // delete bad image
-      try {
-        std::filesystem::remove(entry.path());
-        LOG(INFO) << "Deleted unclassified image: " << entry.path();
-      } catch (const std::filesystem::filesystem_error& e) {
-        LOG(ERROR) << "Failed to delete image: " << entry.path() << " - " << e.what();
-      }
-      // check if image directory has new files
-      // directory iterator does not update
-      // Wait if the directory is empty
-      while (!hasFiles(foodItem.imageDirectory)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      }
     }
   }
   return false;
