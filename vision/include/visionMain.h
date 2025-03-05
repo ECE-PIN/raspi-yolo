@@ -9,4 +9,5 @@
 
 void visionEntry(struct Pipes);
 bool startPythonServer();
+bool isPythonServerReady();
 #endif

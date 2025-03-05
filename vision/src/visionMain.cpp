@@ -26,10 +26,15 @@ void visionEntry(struct Pipes pipes) {
 
     LOG(WARNING) << "Python server failed to start. Retrying in 2 seconds... ("
                  << retryCount << "/" << maxRetries << ")";
-    sleep(2); // Wait 2 seconds before retrying
+    std::this_thread::sleep_for(
+        std::chrono::seconds(2)); // Wait 2 seconds before retrying
   }
 
-  sleep(5); // Wait 5 sec to ensure Python server starts
+  LOG(INFO) << "Waiting for Python server to be ready...";
+  if (!isPythonServerReady()) {
+    LOG(FATAL) << "Python server did not become ready in time.";
+    exit(1);
+  }
 
   struct FoodItem foodItem;
   ImageProcessor processor = ImageProcessor(pipes, foodItem);
@@ -42,7 +47,7 @@ void visionEntry(struct Pipes pipes) {
       processor.process();
     }
     else {
-      usleep(500000);
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
 }
@@ -71,4 +76,24 @@ bool startPythonServer() {
     LOG(INFO) << "Python server started with PID: " << pid;
     return true;
   }
+}
+
+/**
+ * Start the python server for hosting models
+ *
+ * @return success for fail
+ */
+bool isPythonServerReady() {
+  constexpr int MAX_RETRIES    = 50;
+  constexpr int RETRY_DELAY_MS = 500;
+
+  namespace fs = std::filesystem;
+
+  for (int i = 0; i < MAX_RETRIES; ++i) {
+    if (fs::exists(PIPE_OUT)) {
+      return true;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_DELAY_MS));
+  }
+  return false;
 }
