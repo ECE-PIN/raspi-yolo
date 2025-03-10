@@ -33,6 +33,7 @@ DisplayEngine::DisplayEngine(const char* windowTitle,
       requestSocket(context, zmqpp::socket_type::request),
       DISPLAY_ENDPOINT(displayEndpoint), ENGINE_ENDPOINT(engineEndpoint),
       logger("display_engine.txt") {
+  this->logger.log("Constructing display engine");
   // Setup sockets
   try {
     this->requestSocket.connect(this->DISPLAY_ENDPOINT);
@@ -55,6 +56,7 @@ DisplayEngine::DisplayEngine(const char* windowTitle,
   this->itemList  = std::make_unique<ItemList>(this->displayGlobal);
 
   displayIsRunning = true;
+  this->logger.log("Engine is constructed and now running");
 }
 
 /**
@@ -75,7 +77,7 @@ SDL_Window* DisplayEngine::setupWindow(const char* windowTitle,
                                        int screenWidth,
                                        int screenHeight,
                                        bool fullscreen) {
-  LOG(INFO) << "Creating SDL display window";
+  this->logger.log("Creating SDL display window");
 
   int flags = 0;
   if (fullscreen) {

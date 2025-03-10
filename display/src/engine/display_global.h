@@ -7,7 +7,8 @@
 struct DisplayGlobal {
   SDL_Renderer* renderer;
   SDL_Window* window;
-  std::string futuramFontPath = "../display/fonts/16020_FUTURAM.ttf";
+  static const std::string futuramFontPath;
+  static const std::string logger;
 };
 
 #endif

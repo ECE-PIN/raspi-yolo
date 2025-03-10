@@ -23,7 +23,7 @@ public:
 protected:
   EngineState currentState;
   struct DisplayGlobal displayGlobal;
-  std::unique_ptr<Container> rootElement;
+  std::shared_ptr<Container> rootElement;
 };
 
 #endif

@@ -18,11 +18,13 @@
  */
 Panel::Panel(struct DisplayGlobal displayGlobal,
              const SDL_Rect& boundaryRectangle,
-             const int& id)
+             const int& id,
+             const std::string& logFile)
     : id(id) {
   this->displayGlobal = displayGlobal;
-
   setupPosition(boundaryRectangle);
+  this->logger  = std::make_unique<Logger>(logFile);
+  this->logFile = logFile;
 }
 
 /**
@@ -60,7 +62,7 @@ void Panel::addFoodItem(const FoodItem& foodItem, const SDL_Point& relativePosit
   addFoodItemExpirationDate(foodItem, relativePosition);
 
   std::unique_ptr<NumberSetting> itemQuantity = std::make_unique<NumberSetting>(
-      this->displayGlobal, SDL_Rect{0, 0, 0, 0}, this->id);
+      this->displayGlobal, SDL_Rect{0, 0, 0, 0}, this->id, this->logFile);
   addElement(std::move(itemQuantity));
 }
 

@@ -63,6 +63,9 @@ void Element::updatePosition() {
 
 std::string Element::getContent() const { return "no content"; }
 
+void Element::setMediator(std::shared_ptr<Mediator> mediator) {
+  this->mediator = mediator;
+}
 void Element::setParent(Element* parent) { this->parent = parent; }
 
 void Element::setPositionRelativeToParent(const SDL_Point& relativePostion) {

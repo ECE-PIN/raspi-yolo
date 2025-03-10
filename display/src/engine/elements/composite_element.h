@@ -10,7 +10,7 @@
  */
 class CompositeElement : public Element {
 public:
-  void addElement(std::unique_ptr<Element> element) override;
+  void addElement(std::shared_ptr<Element> element) override;
   void update() override;
   void render() const override;
   void handleEvent(const SDL_Event& event) override;
@@ -20,7 +20,7 @@ protected:
   virtual void renderSelf() const;
   virtual void handleEventSelf(const SDL_Event& event) = 0;
 
-  std::vector<std::unique_ptr<Element>> children;
+  std::vector<std::shared_ptr<Element>> children;
 };
 
 #endif

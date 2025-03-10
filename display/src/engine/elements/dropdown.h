@@ -2,7 +2,8 @@
 #define DROPDOWN_H
 
 #include "button.h"
-#include "composite_element.h"
+
+class CompositeElement;
 
 class Dropdown : public CompositeElement {
 public:
@@ -10,7 +11,7 @@ public:
            const SDL_Rect& boundaryRectangle,
            const std::string& titleContent);
 
-  void addOption(std::unique_ptr<Button> newOption);
+  void addOption(std::shared_ptr<Button> newOption);
 
 private:
   void handleEventSelf(const SDL_Event& event) override;

@@ -15,9 +15,10 @@ class NumberSetting : public CompositeElement {
 public:
   NumberSetting(struct DisplayGlobal displayGlobal,
                 const SDL_Rect& boundaryRectangle,
-                int settingId);
-  void setSettingId(const int& newSettingId);
+                int settingId,
+                const std::string& logFile);
 
+  void setSettingId(const int& newSettingId);
   void updateSelf() override;
   void handleEventSelf(const SDL_Event& event) override;
 
