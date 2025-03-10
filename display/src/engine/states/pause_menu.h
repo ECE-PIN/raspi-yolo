@@ -19,6 +19,9 @@ class PauseMenu : public State {
 public:
   PauseMenu(struct DisplayGlobal);
   void render() const override;
+
+private:
+  Logger logger;
 };
 
 #endif

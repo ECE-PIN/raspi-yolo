@@ -17,12 +17,16 @@
  * @param displayGlobal
  * @param boundaryRectangle Rectangle defining offset within parent (if any) and width +
  * height
+ * @param logFile The logfile to write logs to
  */
 ScrollBox::ScrollBox(struct DisplayGlobal displayGlobal,
-                     const SDL_Rect& boundaryRectangle) {
+                     const SDL_Rect& boundaryRectangle,
+                     const std::string& logFile) {
   this->displayGlobal     = displayGlobal;
   this->previousUpdate    = std::chrono::steady_clock::now();
   this->boundaryRectangle = boundaryRectangle;
+  this->logFile           = logFile;
+  this->logger            = std::make_unique<Logger>(logFile);
 }
 
 void ScrollBox::setPanelHeight(int panelHeight) { this->panelHeight = panelHeight; }
@@ -32,6 +36,9 @@ void ScrollBox::setPanelHeight(int panelHeight) { this->panelHeight = panelHeigh
  * corresponds to one food item. Therefore there will be as many panels in the scroll box
  * as there are food items passed. Don't want to refresh panels constantly (will cause
  * program to crash), so only refresh on a set interval.
+ *
+ * @param None
+ * @return None
  */
 void ScrollBox::updateSelf() {
   if (parent) {
@@ -44,8 +51,8 @@ void ScrollBox::updateSelf() {
   updateDifference = std::chrono::duration_cast<std::chrono::seconds>(
       this->currentUpdate - this->previousUpdate);
 
-  // 5 or more seconds since last update
-  if (updateDifference.count() > 5) {
+  // 1 or more seconds since last update
+  if (updateDifference.count() > 3) {
     refreshPanels();
     this->previousUpdate = this->currentUpdate;
   }
@@ -83,14 +90,15 @@ void ScrollBox::renderSelf() const {}
  * @return None
  */
 void ScrollBox::refreshPanels() {
-  std::vector<FoodItem> allFoodItems = readAllFoodItems();
+  // std::vector<FoodItem> allFoodItems = readAllFoodItems();
+  std::vector<FoodItem> allFoodItems = readAllFoodItemsSorted(this->sortMethod);
 
   this->children.clear();
   SDL_Rect boundaryRectangle = {0, topPanelPosition, 0, this->panelHeight};
 
   for (auto& foodItem : allFoodItems) {
-    std::unique_ptr<Panel> newPanel =
-        std::make_unique<Panel>(this->displayGlobal, boundaryRectangle, foodItem.getId());
+    std::unique_ptr<Panel> newPanel = std::make_unique<Panel>(
+        this->displayGlobal, boundaryRectangle, foodItem.getId(), this->logFile);
     boundaryRectangle.y += panelHeight;
 
     newPanel->addFoodItem(foodItem, SDL_Point{0, 0});
@@ -128,4 +136,21 @@ void ScrollBox::scrollDown() {
     currPanelRelativePosition.y += this->scrollAmount;
     currPanel->setPositionRelativeToParent(currPanelRelativePosition);
   }
+}
+
+void ScrollBox::setSortMethod(SortMethod sortMethod) {
+  switch (sortMethod) {
+  case SortMethod::LOW_TO_HIGH:
+    this->sortMethod = SortMethod::LOW_TO_HIGH;
+    this->logger->log("Scrollbox sort method changed to low to high");
+    break;
+  case SortMethod::HIGH_TO_LOW:
+    this->sortMethod = SortMethod::HIGH_TO_LOW;
+    this->logger->log("Scrollbox sort method changed to high to low");
+    break;
+  default:
+    LOG(FATAL) << "Attempt to set sort method to invalid method";
+  }
+
+  refreshPanels();
 }

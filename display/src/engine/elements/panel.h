@@ -22,7 +22,8 @@ class Panel : public CompositeElement {
 public:
   Panel(struct DisplayGlobal displayGlobal,
         const SDL_Rect& boundaryRectangle,
-        const int& id);
+        const int& id,
+        const std::string& logFile);
 
   void addText(const std::string& fontPath,
                const std::string& content,

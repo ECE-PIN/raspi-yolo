@@ -19,8 +19,11 @@
  */
 class MainMenu : public State {
 public:
-  MainMenu(struct DisplayGlobal);
+  MainMenu(struct DisplayGlobal displayGlobal);
   void render() const override;
+
+private:
+  Logger logger;
 };
 
 #endif

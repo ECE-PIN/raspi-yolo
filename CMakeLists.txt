@@ -43,8 +43,12 @@ add_executable(expirationTracker
   main.cpp
   food_item.cpp
   endpoints.cpp
+  logger.cpp
   
 
+  display/src/log_files.cpp
+
+  display/src/engine/display_global.cpp
   # Display process after forked from main
   display/src/display_entry.cpp
   # Handler for messages from other processes and the display engine
@@ -58,6 +62,7 @@ add_executable(expirationTracker
   display/src/engine/display_engine.cpp
   display/src/engine/sdl_debug.cpp
   # GUI Elements
+  display/src/engine/elements/element_mediator.cpp
   display/src/engine/elements/container.cpp
   display/src/engine/elements/element.cpp
   display/src/engine/elements/composite_element.cpp

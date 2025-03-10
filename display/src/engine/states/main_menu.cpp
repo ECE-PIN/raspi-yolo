@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+#include "../../log_files.h"
 #include "../display_global.h"
 #include "../elements/composite_element.h"
 #include "main_menu.h"
@@ -10,7 +11,8 @@
 /**
  * @param displayGlobal Global display variables.
  */
-MainMenu::MainMenu(struct DisplayGlobal displayGlobal) {
+MainMenu::MainMenu(struct DisplayGlobal displayGlobal) : logger(LogFiles::mainMenu) {
+  this->logger.log("Constructing main menu state");
   this->currentState = EngineState::MAIN_MENU;
 
   this->displayGlobal        = displayGlobal;
@@ -35,7 +37,7 @@ MainMenu::MainMenu(struct DisplayGlobal displayGlobal) {
   SDL_Rect newScanButtonRectangle       = {200, 150, 200, 50};
   std::unique_ptr<Button> newScanButton = std::make_unique<Button>(
       this->displayGlobal, newScanButtonRectangle, "Scan New Item", SDL_Point{10, 10},
-      [this]() { this->currentState = EngineState::SCANNING; });
+      [this]() { this->currentState = EngineState::SCANNING; }, LogFiles::mainMenu);
   newScanButton->setCenteredHorizontal();
   rootElement->addElement(std::move(newScanButton));
 
@@ -43,9 +45,12 @@ MainMenu::MainMenu(struct DisplayGlobal displayGlobal) {
   SDL_Rect viewStoredButtonRectangle       = {200, 210, 200, 50};
   std::unique_ptr<Button> viewStoredButton = std::make_unique<Button>(
       this->displayGlobal, viewStoredButtonRectangle, "View Stored Items",
-      SDL_Point{10, 10}, [this]() { this->currentState = EngineState::ITEM_LIST; });
+      SDL_Point{10, 10}, [this]() { this->currentState = EngineState::ITEM_LIST; },
+      LogFiles::mainMenu);
   viewStoredButton->setCenteredHorizontal();
   rootElement->addElement(std::move(viewStoredButton));
+
+  this->logger.log("Main menu state successfully constructed");
 }
 
 /**

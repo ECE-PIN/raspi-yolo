@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 
+#include "../../log_files.h"
 #include "../display_global.h"
 #include "pause_menu.h"
 
@@ -10,7 +11,9 @@
  * @param displayGlobal Global display variables
  * @return None
  */
-PauseMenu::PauseMenu(struct DisplayGlobal displayGlobal) {
+PauseMenu::PauseMenu(struct DisplayGlobal displayGlobal) : logger(LogFiles::pauseMenu) {
+  this->logger.log("Constructing pause menu state");
+
   this->currentState         = EngineState::PAUSE_MENU;
   this->displayGlobal        = displayGlobal;
   SDL_Surface* windowSurface = SDL_GetWindowSurface(this->displayGlobal.window);
@@ -34,7 +37,7 @@ PauseMenu::PauseMenu(struct DisplayGlobal displayGlobal) {
   SDL_Rect resumeButtonRectangle       = {200, 150, 200, 50};
   std::unique_ptr<Button> resumeButton = std::make_unique<Button>(
       this->displayGlobal, resumeButtonRectangle, "Resume", SDL_Point{10, 10},
-      [this]() { this->currentState = EngineState::SCANNING; });
+      [this]() { this->currentState = EngineState::SCANNING; }, LogFiles::pauseMenu);
   resumeButton->setCenteredHorizontal();
   this->rootElement->addElement(std::move(resumeButton));
 
@@ -42,9 +45,11 @@ PauseMenu::PauseMenu(struct DisplayGlobal displayGlobal) {
   SDL_Rect mainMenuButtonRectangle       = {200, 225, 200, 50};
   std::unique_ptr<Button> mainMenuButton = std::make_unique<Button>(
       this->displayGlobal, mainMenuButtonRectangle, "Main Menu", SDL_Point{10, 10},
-      [this]() { this->currentState = EngineState::MAIN_MENU; });
+      [this]() { this->currentState = EngineState::MAIN_MENU; }, LogFiles::pauseMenu);
   mainMenuButton->setCenteredHorizontal();
   this->rootElement->addElement(std::move(mainMenuButton));
+
+  this->logger.log("Constructed pause menu state");
 }
 
 /**

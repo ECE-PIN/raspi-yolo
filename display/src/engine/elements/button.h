@@ -21,18 +21,29 @@ public:
          const SDL_Rect& boundaryRectangle,
          const std::string& textContent,
          const SDL_Point& textPadding,
-         std::function<void()> callback);
+         std::function<void()> callback,
+         const std::string& logFile);
 
+  Button(struct DisplayGlobal displayGlobal,
+         const SDL_Rect& boundaryRectangle,
+         const std::string& textContent,
+         const SDL_Point& textPadding,
+         const std::string& notifyMessage,
+         const std::string& logFile);
+
+  void initialize();
   void updateSelf() override;
   void renderSelf() const override;
   void handleEventSelf(const SDL_Event& event) override;
 
 private:
+  std::string textContent;
   std::function<void()> onClick;
   SDL_Color backgroundColor;
   SDL_Color defaultColor;
   SDL_Color hoveredColor;
   SDL_Point textPadding = {0, 0};
+  std::string notifyMessage;
 };
 
 #endif
