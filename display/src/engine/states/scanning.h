@@ -17,6 +17,9 @@ public:
   Scanning(struct DisplayGlobal displayGlobal);
   EngineState checkKeystates();
   void render() const override;
+
+private:
+  Logger logger;
 };
 
 #endif

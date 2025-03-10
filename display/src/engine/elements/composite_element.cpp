@@ -21,7 +21,7 @@ void CompositeElement::update() {
  * @param element The new element to be added to the composite
  * @return None
  */
-void CompositeElement::addElement(std::unique_ptr<Element> element) {
+void CompositeElement::addElement(std::shared_ptr<Element> element) {
   SDL_Rect elementRect = element->getBoundaryRectangle();
   if (elementRect.w == 0) {
     elementRect.w = this->boundaryRectangle.w;

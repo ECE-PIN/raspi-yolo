@@ -8,8 +8,8 @@
 
 #include "../../../../food_item.h"
 #include "../display_global.h"
-#include "element.h"
 #include "panel.h"
+#include "sort_method.h"
 
 /**
  * An element that contains a column of panels and allows the user to scroll through them
@@ -19,7 +19,9 @@
  */
 class ScrollBox : public CompositeElement {
 public:
-  ScrollBox(struct DisplayGlobal displayGlobal, const SDL_Rect& boundaryRectangle);
+  ScrollBox(struct DisplayGlobal displayGlobal,
+            const SDL_Rect& boundaryRectangle,
+            const std::string& logFile);
 
   void setPanelHeight(int panelHeight);
   void addPanel(std::unique_ptr<Panel> panel, SDL_Rect containingRectangle);
@@ -27,6 +29,8 @@ public:
   void updateSelf() override;
   void renderSelf() const override;
   void handleEventSelf(const SDL_Event& event);
+
+  void setSortMethod(SortMethod sortMethod);
 
 private:
   void refreshPanels();
@@ -38,6 +42,8 @@ private:
   int panelHeight;
   int topPanelPosition = 0;
   int scrollAmount     = 4;
+
+  SortMethod sortMethod = SortMethod::LOW_TO_HIGH;
 };
 
 #endif

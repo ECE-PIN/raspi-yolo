@@ -17,13 +17,16 @@
  */
 NumberSetting::NumberSetting(struct DisplayGlobal displayGlobal,
                              const SDL_Rect& boundaryRectangle,
-                             int settingId)
+                             int settingId,
+                             const std::string& logFile)
     : settingId(settingId) {
   setupPosition(boundaryRectangle);
+  this->logger  = std::make_unique<Logger>(logFile);
+  this->logFile = logFile;
 
-  std::unique_ptr<Button> decreaseButton =
-      std::make_unique<Button>(displayGlobal, SDL_Rect{0, 0, 0, 0}, "-", SDL_Point{0, 0},
-                               [this]() { this->settingValue--; });
+  std::unique_ptr<Button> decreaseButton = std::make_unique<Button>(
+      displayGlobal, SDL_Rect{0, 0, 0, 0}, "-", SDL_Point{0, 0},
+      [this]() { this->settingValue--; }, this->logFile);
   addElement(std::move(decreaseButton));
 
   std::unique_ptr<Text> text = std::make_unique<Text>(displayGlobal, SDL_Rect{0, 0, 0, 0},
@@ -31,9 +34,9 @@ NumberSetting::NumberSetting(struct DisplayGlobal displayGlobal,
                                                       24, SDL_Color{0, 255, 0, 255});
   addElement(std::move(text));
 
-  std::unique_ptr<Button> increaseButton =
-      std::make_unique<Button>(displayGlobal, SDL_Rect{0, 0, 0, 0}, "+", SDL_Point{0, 0},
-                               [this]() { this->settingValue++; });
+  std::unique_ptr<Button> increaseButton = std::make_unique<Button>(
+      displayGlobal, SDL_Rect{0, 0, 0, 0}, "+", SDL_Point{0, 0},
+      [this]() { this->settingValue++; }, this->logFile);
   addElement(std::move(increaseButton));
 
   FoodItem foodItem  = readFoodItemById(this->settingId);

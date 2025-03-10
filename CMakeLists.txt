@@ -43,21 +43,32 @@ add_executable(expirationTracker
   main.cpp
   food_item.cpp
   endpoints.cpp
+  logger.cpp
   
+
+
 
   # Display process after forked from main
   display/src/display_entry.cpp
+
   # Handler for messages from other processes and the display engine
   display/src/display_handler.cpp
+
   # Database operations on food items
   display/src/sql_food.cpp
+  
   # Entry into engine after forked from displayEntry
   display/src/engine/engine_entry.cpp
+
   # GUI 
+  display/src/log_files.cpp
   display/src/engine/engine_state.cpp
   display/src/engine/display_engine.cpp
   display/src/engine/sdl_debug.cpp
+  display/src/engine/display_global.cpp
+
   # GUI Elements
+  display/src/engine/elements/element_mediator.cpp
   display/src/engine/elements/container.cpp
   display/src/engine/elements/element.cpp
   display/src/engine/elements/composite_element.cpp
@@ -67,12 +78,12 @@ add_executable(expirationTracker
   display/src/engine/elements/scroll_box.cpp
   display/src/engine/elements/number_setting.cpp
   display/src/engine/elements/dropdown.cpp
+
   # GUI States
   display/src/engine/states/state.cpp
-  display/src/engine/states/main_menu.cpp
   display/src/engine/states/scanning.cpp
-  display/src/engine/states/pause_menu.cpp
   display/src/engine/states/item_list.cpp
+
   # Vision process after forked from main
   vision/src/helperFunctions.cpp
   vision/src/ImageProcessor.cpp

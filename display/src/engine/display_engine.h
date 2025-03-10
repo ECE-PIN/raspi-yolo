@@ -11,8 +11,6 @@
 #include "../../../logger.h"
 
 #include "states/item_list.h"
-#include "states/main_menu.h"
-#include "states/pause_menu.h"
 #include "states/scanning.h"
 
 #include "display_global.h"
@@ -61,12 +59,10 @@ private:
   const std::string& DISPLAY_ENDPOINT;
   const std::string& ENGINE_ENDPOINT;
 
-  EngineState engineState = EngineState::MAIN_MENU;
+  EngineState engineState = EngineState::ITEM_LIST;
 
   // States
-  std::unique_ptr<MainMenu> mainMenu;
   std::unique_ptr<Scanning> scanning;
-  std::unique_ptr<PauseMenu> pauseMenu;
   std::unique_ptr<ItemList> itemList;
 
   bool displayIsRunning = false;

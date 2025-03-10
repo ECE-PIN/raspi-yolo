@@ -11,7 +11,9 @@
 /**
  * @param displayGlobal Global variables
  */
-Scanning::Scanning(struct DisplayGlobal displayGlobal) {
+Scanning::Scanning(struct DisplayGlobal displayGlobal) : logger("scanning_state.txt") {
+  this->logger.log("Constructing scanning state");
+
   this->currentState         = EngineState::SCANNING;
   this->displayGlobal        = displayGlobal;
   SDL_Surface* windowSurface = SDL_GetWindowSurface(this->displayGlobal.window);
@@ -31,6 +33,8 @@ Scanning::Scanning(struct DisplayGlobal displayGlobal) {
 
   progressMessage->setCenteredHorizontal();
   this->rootElement->addElement(std::move(progressMessage));
+
+  this->logger.log("Constructed scanning state");
 }
 
 /**
@@ -42,9 +46,12 @@ Scanning::Scanning(struct DisplayGlobal displayGlobal) {
 EngineState Scanning::checkKeystates() {
   const Uint8* keystates = SDL_GetKeyboardState(NULL);
 
+  /*
   if (keystates[SDL_SCANCODE_ESCAPE]) {
+    this->logger.log("Escape key pressed in scanning state");
     return EngineState::PAUSE_MENU;
   }
+  */
 
   return EngineState::SCANNING;
 }

@@ -1,3 +1,4 @@
+#include "composite_element.h"
 #include "dropdown.h"
 
 /**
@@ -25,7 +26,7 @@ Dropdown::Dropdown(struct DisplayGlobal displayGlobal,
  * @param newOption The new option button to add to the dropdown.
  * @return None
  */
-void Dropdown::addOption(std::unique_ptr<Button> newOption) {
+void Dropdown::addOption(std::shared_ptr<Button> newOption) {
   SDL_Point newOptionRelativePosition = newOption->getPositionRelativeToParent();
   SDL_Rect lowestOptionRectangle      = this->children.back()->getBoundaryRectangle();
   newOptionRelativePosition.y         = lowestOptionRectangle.h + lowestOptionRectangle.y;

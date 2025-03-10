@@ -19,8 +19,11 @@ Button::Button(struct DisplayGlobal displayGlobal,
                const SDL_Rect& boundaryRectangle,
                const std::string& textContent,
                const SDL_Point& textPadding,
-               std::function<void()> callback)
-    : textPadding(textPadding), onClick(callback) {
+               std::function<void()> callback,
+               const std::string& logFile)
+    : textContent(textContent), textPadding(textPadding), onClick(callback) {
+  this->logger = std::make_unique<Logger>(logFile);
+
   this->displayGlobal = displayGlobal;
 
   setupPosition(boundaryRectangle);
@@ -35,7 +38,7 @@ Button::Button(struct DisplayGlobal displayGlobal,
   SDL_Rect textRect          = {textPadding.x, textPadding.y, 0, 0};
   std::unique_ptr<Text> text = std::make_unique<Text>(
       this->displayGlobal, textRect, "../display/fonts/16020_FUTURAM.ttf",
-      textContent.c_str(), 24, textColor);
+      this->textContent.c_str(), 24, textColor);
   text->setCentered();
 
   // Size based on text
@@ -46,6 +49,65 @@ Button::Button(struct DisplayGlobal displayGlobal,
   }
 
   addElement(std::move(text));
+}
+
+Button::Button(struct DisplayGlobal displayGlobal,
+               const SDL_Rect& boundaryRectangle,
+               const std::string& textContent,
+               const SDL_Point& textPadding,
+               const std::string& notifyMessage,
+               const std::string& logFile)
+    : textContent(textContent), textPadding(textPadding), notifyMessage(notifyMessage) {
+  this->logger = std::make_unique<Logger>(logFile);
+  this->logger->log("Constructing " + this->textContent + " button");
+
+  this->displayGlobal = displayGlobal;
+
+  setupPosition(boundaryRectangle);
+
+  // Colors
+  this->backgroundColor = {255, 0, 0, 255}; // Red
+  this->hoveredColor    = {0, 255, 0, 255}; // Green
+  this->defaultColor    = {255, 0, 0, 255}; // Red
+
+  // Button Text
+  SDL_Color textColor        = {255, 255, 0, 255}; // Yellow
+  SDL_Rect textRect          = {textPadding.x, textPadding.y, 0, 0};
+  std::unique_ptr<Text> text = std::make_unique<Text>(
+      this->displayGlobal, textRect, "../display/fonts/16020_FUTURAM.ttf",
+      this->textContent.c_str(), 24, textColor);
+  text->setCentered();
+
+  // Size based on text
+  if (this->boundaryRectangle.w == 0 && this->boundaryRectangle.h == 0) {
+    SDL_Rect textboundaryRectangle = text->getBoundaryRectangle();
+    this->boundaryRectangle.w      = textboundaryRectangle.w + textPadding.x;
+    this->boundaryRectangle.h      = textboundaryRectangle.h + textPadding.y;
+  }
+
+  addElement(std::move(text));
+  this->logger->log(this->textContent + " button constructed");
+}
+
+void Button::initialize() {
+  this->logger->log("Initializing " + this->textContent + " button");
+
+  this->onClick = [this]() {
+    if (auto mediatorShared = this->mediator.lock()) {
+      this->logger->log(this->textContent + " button notifying mediator with message " +
+                        this->notifyMessage);
+
+      mediatorShared->notify(shared_from_this(), this->notifyMessage);
+
+      this->logger->log(this->textContent + " button successfully notified mediator");
+    }
+    else {
+      this->logger->log(this->textContent + " button unable to get mediator lock");
+      // uh oh
+    }
+  };
+
+  this->logger->log("Successfully initialized " + this->textContent + " button");
 }
 
 /**
@@ -61,6 +123,7 @@ void Button::updateSelf() {
 
   // Change color if hovered
   if (checkHovered()) {
+    this->logger->log(this->textContent + " button hovered");
     this->backgroundColor = this->hoveredColor;
   }
   else {
@@ -91,7 +154,9 @@ void Button::renderSelf() const {
 void Button::handleEventSelf(const SDL_Event& event) {
   if (event.type == SDL_MOUSEBUTTONDOWN) {
     if (checkHovered() == true) {
+      this->logger->log(this->textContent + " button clicked");
       onClick();
+      this->logger->log(this->textContent + " button click callback successful");
     }
   }
 }
