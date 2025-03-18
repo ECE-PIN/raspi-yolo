@@ -47,10 +47,8 @@ sudo make install
 cd ../../..
 rm -rf zero
 
-#mDNS
-sudo apt install avahi-daemon
-sudo systemctl enable avahi-daemon
-sudo systemctl start avahi-daemon
+#json
+sudo apt install nlohmann-json3-dev
 
 # Python virtual envrionment
 mkdir build
@@ -58,8 +56,7 @@ cd build
 python3 -m venv models-venv
 source models-venv/bin/activate
 pip install easyocr
-pip install efficientnet
-pip install tensorflow
+pip install ultralytics
 pip install pyzmq
 deactivate
 

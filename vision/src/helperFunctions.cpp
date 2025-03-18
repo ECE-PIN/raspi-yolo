@@ -90,3 +90,28 @@ std::string removePrefix(const std::string& string, const std::string& prefix) {
   }
   return string;
 }
+
+/**
+ * Joins the past vector to a single string separated by given delimiter. Default delim:
+ * ", "
+ *
+ * Input:
+ * @param vec original vector to join
+ * @param delimiter delimiter to separate strings
+ * Output:
+ * @return updated string with prefix removed
+ */
+std::string joinVector(const std::vector<std::string>& vec,
+                       const std::string& delimiter) {
+  if (vec.empty())
+    return "";
+
+  std::ostringstream oss;
+  auto it = vec.begin();
+  oss << *it; // Add first element
+
+  for (++it; it != vec.end(); ++it) {
+    oss << delimiter << *it;
+  }
+  return oss.str();
+}

@@ -4,6 +4,7 @@ import struct
 import cv2
 import numpy as np
 import socket
+import json
 from easyOCR import performOCR
 
 PORT = "5555" #zeroMQ port
@@ -81,29 +82,14 @@ def run_server():
                     continue
                 
                 print(f"Image decoded. Now beginning AI processing.")
-                """
-                # Display image
-                plt.figure(figsize=(10,10))
-                plt.imshow(image)
-                plt.axis('off')
-                plt.title("Processing Image")
-                plt.show(block=False)
-               """
 
                 # Perform OCR
-                result = performOCR(image)
-
-                """
-                plt.title(f"Result found: {result}")
-                plt.draw()
-                plt.pause(10)
-                plt.close()
-               """
+                result = json.dumps(performOCR(image))
 
                 print(f"Processing complete. Sending result back.")
                 # Send response
                 socket.send_string(result)
-                print(f"Sent response: {result[:50]}...")
+                print(f"Sent response: {result}")
             else:
                 pass
     except KeyboardInterrupt:

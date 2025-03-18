@@ -21,16 +21,11 @@ TextClassifier::TextClassifier(zmqpp::context& context,
  * @param imagePath Path to the image to extract text from
  * @return pair <item identification success/fail, string>
  */
-std::optional<std::string> TextClassifier::handleClassification(
-    const std::filesystem::path& imagePath) {
+OCRResult TextClassifier::handleClassification(const std::filesystem::path& imagePath) {
   this->logger.log("Entering handleClassification, running model");
-  auto result = this->runModel(imagePath);
-
-  std::string detectedClass = std::string(result);
-  if (detectedClass.find("CLASSIFICATION") != std::string::npos) {
-    return removePrefix(detectedClass, "CLASSIFICATION: ");
-  }
-  return std::nullopt;
+  OCRResult result = this->runModel(imagePath);
+  this->logger.log("Output handled. Returning OCRResult to model handler.");
+  return result;
 }
 
 /**
@@ -40,14 +35,17 @@ std::optional<std::string> TextClassifier::handleClassification(
  * @param imagePath path to the image to extract text from
  * @return The result send back from the python server
  */
-std::string TextClassifier::runModel(const std::filesystem::path& imagePath) {
+OCRResult TextClassifier::runModel(const std::filesystem::path& imagePath) {
   this->logger.log("Entering runModel");
+  OCRResult classifications;
+
   // Load image
   this->logger.log("Loading image");
   cv::Mat image = cv::imread(imagePath);
   if (image.empty()) {
+    this->logger.log("Error loading image" + imagePath.string());
     LOG(FATAL) << "Error: Could not load image.";
-    return "SHIIIIII";
+    return classifications;
   }
   this->logger.log("Image loaded");
   // Encode image as JPG
@@ -55,7 +53,7 @@ std::string TextClassifier::runModel(const std::filesystem::path& imagePath) {
   std::vector<uchar> encoded_image;
   if (!cv::imencode(".jpg", image, encoded_image)) {
     LOG(FATAL) << "Error: Image encoding failed.";
-    return "IMAGE_ENCODE_ERROR";
+    return classifications;
   }
   this->logger.log("Image Compressed");
 
@@ -75,13 +73,57 @@ std::string TextClassifier::runModel(const std::filesystem::path& imagePath) {
     // Receive OCR result
     zmqpp::message response;
     this->requestSocket.receive(response);
+
+    if (response.parts() == 0) {
+      this->logger.log("No response received from OCR server");
+      LOG(FATAL) << "No response received from OCR server";
+      return classifications;
+    }
+
     std::string extractedText;
     response.get(extractedText, 0);
+    this->logger.log("Received raw OCR result:" + extractedText);
+    std::string foodClassification = "";
+    std::string expirationDate     = "";
+    try {
+      if (extractedText.empty() || extractedText[0] != '{') {
+        this->logger.log("Invalid JSON received: " + extractedText);
+        LOG(FATAL) << "Invalid JSON received: " << extractedText;
+        return classifications;
+      }
 
-    this->logger.log("Received OCR result: " + extractedText);
-    return extractedText;
+      nlohmann::json formatText = nlohmann::json::parse(extractedText);
+      if (formatText.contains("Food Labels") && formatText["Food Labels"].is_array()) {
+        classifications.setFoodItems(
+            formatText["Food Labels"].get<std::vector<std::string>>());
+      }
+
+      if (formatText.contains("Expiration Date") &&
+          formatText["Expiration Date"].is_array()) {
+        classifications.setExpirationDates(
+            formatText["Expiration Date"].get<std::vector<std::string>>());
+      }
+
+    } catch (const nlohmann::json::parse_error& e) {
+      LOG(FATAL) << "JSON Parse Error: " << e.what();
+      return classifications;
+    } catch (const std::exception& e) {
+      LOG(FATAL) << "General Error: " << e.what();
+      return classifications;
+    }
+
+    this->logger.log("Received classification result: " +
+                     (classifications.getFoodItems().empty()
+                          ? "None"
+                          : joinVector(classifications.getFoodItems(), ", ")));
+    this->logger.log("Received expiration date result: " +
+                     (classifications.getExpirationDates().empty()
+                          ? "None"
+                          : joinVector(classifications.getExpirationDates(), ", ")));
+
+    return classifications;
   } catch (const zmqpp::exception& e) {
     LOG(FATAL) << "ZeroMQ error: " << e.what();
-    return "ZMQ_ERROR";
+    return classifications;
   }
 }

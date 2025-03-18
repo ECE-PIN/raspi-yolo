@@ -19,7 +19,7 @@ void engineEntry(const zmqpp::context& context, const std::string& engineEndpoin
 
   // Initialize the displayEngine
   DisplayEngine displayEngine("Display", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              1024, 600, false, displayGlobal, context,
+                              1024, 600, true, displayGlobal, context,
                               ExternalEndpoints::displayEndpoint, engineEndpoint);
 
   while (displayEngine.running()) {

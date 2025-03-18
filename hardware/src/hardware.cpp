@@ -23,20 +23,6 @@ Hardware::Hardware(zmqpp::context& context)
       this->logger.log("Failed to create directory: " + imageDirectory.string());
     }
   }
-  else if (!imageDirectory.empty()) {
-    // did not properly shutdown last time
-    try {
-      for (const auto& entry : std::filesystem::directory_iterator(imageDirectory)) {
-        if (entry.is_regular_file()) {
-          std::string ext = entry.path().extension().string();
-          std::filesystem::remove(entry.path());
-          this->logger.log("Deleted: " + entry.path().string());
-        }
-      }
-    } catch (const std::filesystem::filesystem_error& e) {
-      this->logger.log("Error deleting files: " + std::string(e.what()));
-    }
-  }
   try {
     this->requestVisionSocket.connect(ExternalEndpoints::visionEndpoint);
     this->requestDisplaySocket.connect(ExternalEndpoints::displayEndpoint);
@@ -63,16 +49,16 @@ bool Hardware::checkStartSignal(int timeoutMs) {
 
     if (poller.poll(timeoutMs)) {
       if (poller.has_input(this->replySocket)) {
-        bool weightIsZero           = false;
+        bool nonzeroWeight          = false;
         bool zeroWeightDecisionMade = false;
-        while (weightIsZero == true || zeroWeightDecisionMade == false) {
+        while (nonzeroWeight == false && zeroWeightDecisionMade == false) {
           std::string request;
           this->replySocket.receive(request);
 
           this->logger.log("Received start signal from display, checking weight");
 
-          weightIsZero = !checkWeight();
-          if (weightIsZero) {
+          nonzeroWeight = checkWeight();
+          if (nonzeroWeight == false) {
             this->logger.log("Informing display that no weight detected on plaform");
             this->replySocket.send(Messages::ZERO_WEIGHT);
             this->logger.log("Informed display that no weight detected on platform");
@@ -163,18 +149,19 @@ void Hardware::sendStartToVision() {
 bool Hardware::startScan() {
   this->logger.log("Starting scan");
 
-  /*
-  this->logger.log("Checking weight");
-  if (checkWeight() == false) {
-    // TODO handle no weight on platform
-    // Send error to display
-    // Possible pattern HW error msg -> Display message with 3 options:
-    // 1. Retry 2. Skip/Override 3. Cancel
-    // Response from Display will then decide action
-    this->logger.log("No weight detected on platform");
-    return false;
+  if (!this->imageDirectory.empty()) {
+    this->logger.log("Clearing directory");
+    try {
+      for (const auto& entry : std::filesystem::directory_iterator(imageDirectory)) {
+        if (entry.is_regular_file()) {
+          std::filesystem::remove(entry.path());
+          this->logger.log("Deleted: " + entry.path().string());
+        }
+      }
+    } catch (const std::filesystem::filesystem_error& e) {
+      this->logger.log("Error deleting files: " + std::string(e.what()));
+    }
   }
-*/
 
   rotateAndCapture();
   this->logger.log("Scan complete");
@@ -274,7 +261,7 @@ bool Hardware::takePhotos(int angle) {
   std::string cmd0 = "rpicam-jpeg --camera 0";
   std::string cmd1 = "rpicam-jpeg --camera 1";
   std::string np   = " --nopreview";
-  std::string res  = " --width 2304 --height 1296";
+  std::string res  = " --width 4608 --height 2592";
   std::string out  = " --output ";
   std::string to   = " --timeout 50"; // DO NOT SET TO 0! Will cause infinite preview!
   std::string topPhoto =

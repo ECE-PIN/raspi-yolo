@@ -157,3 +157,55 @@ pluMapping = {
     4650: "Yuca Root",
     4256: "Starfruit (Carambola)"
 }
+
+openImageFoodItemList = {
+    10: "Apple",
+    16: "Bagel",
+    21: "Banana",
+    37: "Beer",
+    39: "Bell pepper",
+    65: "Bread",
+    67: "Broccoli",
+    76: "Cabbage",
+    78: "Cake",
+    89: "Cantaloupe",
+    92: "Carrot",
+    105: "Cheese",
+    119: "Coconut",
+    120: "Coffee",
+    125: "Common fig",
+    132: "Cookie",
+    146: "Cucumber",
+    166: "Doughnut",
+    178: "Egg",
+    213: "Garden Asparagus",
+    226: "Grape",
+    227: "Grapefruit",
+    229: "Guacamole",
+    306: "Lemon",
+    323: "Mango",
+    347: "Mushroom",
+    356: "Orange",
+    365: "Pancake",
+    372: "Pasta",
+    374: "Peach",
+    375: "Pear",
+    404: "Potato",
+    409: "Pumpkin",
+    414: "Radish",
+    431: "Salt and pepper shakers",
+    486: "Squash",
+    496: "Strawberry",
+    507: "Sushi",
+    540: "Tomato",
+    579: "Watermelon",
+    589: "Wine",
+    599: "Zucchini"    
+}
+
+openImagePackageItemList = {
+    57: "Bottle",
+    62: "Box",
+    394: "Plastic bag",
+    535: "Tin can"
+}

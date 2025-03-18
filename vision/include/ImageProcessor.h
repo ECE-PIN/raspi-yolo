@@ -17,8 +17,7 @@ public:
   bool analyze();
   struct FoodItem& getFoodItem();
   void setFoodItem(struct FoodItem&);
-  void tellHardwareToStop();
-  void tellDisplayWeFailed();
+  void processImagePair(int, ClassifyObjectReturn&);
 
 private:
   Logger logger;

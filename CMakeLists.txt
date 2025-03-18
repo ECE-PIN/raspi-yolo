@@ -90,9 +90,9 @@ add_executable(expirationTracker
   vision/src/ImageProcessor.cpp
   vision/src/IModel.cpp
   vision/src/ModelHandler.cpp
-  vision/src/ObjectClassifier.cpp
   vision/src/TextClassifier.cpp
   vision/src/visionMain.cpp
+  vision/src/OCRResult.cpp
   #Hardware process after forked from main
   hardware/src/hardware_entry.cpp
   hardware/src/hardware.cpp

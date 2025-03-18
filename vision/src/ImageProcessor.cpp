@@ -27,8 +27,9 @@ ImageProcessor::ImageProcessor(zmqpp::context& context)
  * @return None
  */
 void ImageProcessor::process() {
-  this->logger.log("Vision analyzing all images");
+  this->logger.log("Entering process");
 
+  this->logger.log("Opening directory: " + foodItem.getImagePath().string());
   if (!isValidDirectory(foodItem.getImagePath())) {
     LOG(FATAL) << "Failed to open image directory";
     return;
@@ -44,22 +45,6 @@ void ImageProcessor::process() {
   else {
     detectionFailed();
   }
-
-  try {
-    for (const auto& entry : std::filesystem::directory_iterator(
-             this->foodItem.getImagePath().parent_path())) {
-      if (entry.is_regular_file()) {
-        std::string ext = entry.path().extension().string();
-        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".bmp" ||
-            ext == ".gif" || ext == ".tiff") {
-          std::filesystem::remove(entry.path());
-          std::cout << "Deleted: " << entry.path() << std::endl;
-        }
-      }
-    }
-  } catch (const std::filesystem::filesystem_error& e) {
-    std::cerr << "Error: " << e.what() << std::endl;
-  }
 }
 
 /**
@@ -69,36 +54,56 @@ void ImageProcessor::process() {
  * @return Whether FoodItem is successfully identified
  */
 bool ImageProcessor::analyze() {
-  int imageCounter    = 0;
-  bool objectDetected = false;
-
-  while (!objectDetected) {
-    for (const auto& entry :
-         std::filesystem::directory_iterator(foodItem.getImagePath())) {
-      if (toLowerCase(entry.path().extension()) != ".jpg") {
-        continue;
-      }
-
-      if (++imageCounter > this->MAX_IMAGE_COUNT) {
-        if (objectDetected) {
-          this->logger.log("Object expiration date not found");
-        }
-        else {
-          this->logger.log("Object not able to be classified");
-        }
-        return false;
-      }
-
-      // Only runs text atm
-      if (!objectDetected) {
-        if (this->modelHandler.classifyObject(entry.path(), this->foodItem)) {
-          objectDetected = true;
-          return true;
-        }
-      }
+  this->logger.log("Entering analyze");
+  ClassifyObjectReturn classifyObjectReturn{false, false};
+  this->logger.log("Beginning image processing.");
+  for (int i = 0; i < 7; i++) {
+    processImagePair(i, classifyObjectReturn);
+    if (classifyObjectReturn.foodItem && classifyObjectReturn.expirationDate) {
+      this->logger.log(
+          "Both food item and expiration date detected. Returning to processor.");
+      std::filesystem::path imagePath =
+          foodItem.getImagePath() / (std::to_string(i) + ".jpg");
+      this->foodItem.setImagePath(std::filesystem::absolute(imagePath));
+      return true;
     }
   }
   return false;
+}
+
+void ImageProcessor::processImagePair(int currentImageNumber,
+                                      ClassifyObjectReturn& classifyObjectReturn) {
+  this->logger.log("Entering processImagePair");
+  std::filesystem::path imageDir = foodItem.getImagePath();
+
+  // Construct expected filenames
+  std::filesystem::path topImage =
+      imageDir / (std::to_string(currentImageNumber) + "_top.jpg");
+  std::filesystem::path sideImage =
+      imageDir / (std::to_string(currentImageNumber) + "_side.jpg");
+  this->logger.log("Looking for image: " + topImage.string());
+  this->logger.log("Looking for image: " + sideImage.string());
+  bool topExists  = false;
+  bool sideExists = false;
+
+  while (!(topExists && sideExists)) { // Wait until BOTH images exist
+    topExists  = std::filesystem::exists(topImage);
+    sideExists = std::filesystem::exists(sideImage);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  }
+  ClassifyObjectReturn sideImageReturn =
+      this->modelHandler.classifyObject(sideImage, this->foodItem);
+  ClassifyObjectReturn topImageReturn =
+      this->modelHandler.classifyObject(topImage, this->foodItem);
+  if (sideImageReturn.foodItem || topImageReturn.foodItem) {
+    this->logger.log("Food item found.");
+    classifyObjectReturn.foodItem = true;
+  }
+  if (sideImageReturn.expirationDate || topImageReturn.expirationDate) {
+    this->logger.log("Expiration date found.");
+    classifyObjectReturn.expirationDate = true;
+  }
+  return;
 }
 
 struct FoodItem& ImageProcessor::getFoodItem() { return this->foodItem; }

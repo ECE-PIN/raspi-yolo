@@ -9,12 +9,18 @@
 #include "ObjectClassifier.h"
 #include "TextClassifier.h"
 #include "externalEndpoints.h"
+#include "foodItemList.h"
+
+struct ClassifyObjectReturn {
+  bool expirationDate;
+  bool foodItem;
+};
 
 class ModelHandler {
 public:
   ModelHandler(zmqpp::context&);
-  bool classifyObject(const std::filesystem::path&, FoodItem&);
-  bool extractExpirationDate(const std::filesystem::path&) const;
+  ClassifyObjectReturn classifyObject(const std::filesystem::path&, FoodItem&);
+  std::chrono::year_month_day extractExpirationDate(const std::string&);
   std::string discoverServerViaUDP();
 
 private:

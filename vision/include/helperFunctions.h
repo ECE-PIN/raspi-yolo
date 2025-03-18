@@ -14,5 +14,6 @@ std::string toLowerCase(std::string);
 std::vector<std::string> splitWords(const std::string&);
 std::string cleanText(const std::string&);
 std::string removePrefix(const std::string&, const std::string&);
+std::string joinVector(const std::vector<std::string>&, const std::string&);
 
 #endif
