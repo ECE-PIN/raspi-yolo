@@ -271,7 +271,9 @@ bool Hardware::takePhotos(int angle) {
 
   std::string command0 = cmd0 + np + res + out + topPhotoPath + timeout;
   std::string command1 = cmd0 + np + res + out + sidePhotoPath + timeout;
+  this->logger.log("Running command0: " + command0);
   system(command0.c_str());
+  this->logger.log("Running command1: " + command1);
   system(command1.c_str());
 
   this->logger.log("Photos successfully captured at position: " + std::to_string(angle));
