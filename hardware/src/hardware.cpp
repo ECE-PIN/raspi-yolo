@@ -32,7 +32,7 @@ Hardware::Hardware(zmqpp::context& context)
   }
 }
 
-/*
+/**
  * Checks for a start signal from the display. Return if have not received a message by
  * the timeout.
  *
@@ -105,7 +105,7 @@ bool Hardware::checkStartSignal(int timeoutMs) {
   }
 }
 
-/*
+/**
  * Sends the photo directory and weight data to the AI Vision system.
  *
  * @param weight The weight of the object on the platform.
@@ -186,7 +186,7 @@ bool Hardware::checkWeight() {
   return true;
 }
 
-/*
+/**
  * Rotates platform in 45-degree increments, captures images, and sends the
  * data to the AI Vision system until a full 360-degree rotation is complete.
  * The process can be stopped early if AI Vision sends a "STOP" signal
@@ -249,7 +249,7 @@ void Hardware::rotateAndCapture() {
   }
 }
 
-/*
+/**
  * Takes two photos, one top & side, saves them to the image directory, and logs
  * Note: current "top camera" is ribbon port closer to USB
  *
@@ -258,29 +258,31 @@ void Hardware::rotateAndCapture() {
  */
 bool Hardware::takePhotos(int angle) {
   this->logger.log("Taking photos at position: " + std::to_string(angle));
-  std::string cmd0 = "rpicam-jpeg --camera 0";
-  std::string cmd1 = "rpicam-jpeg --camera 1";
-  std::string np   = " --nopreview";
-  std::string res  = " --width 4608 --height 2592";
-  std::string out  = " --output ";
-  std::string to   = " --timeout 50"; // DO NOT SET TO 0! Will cause infinite preview!
-  std::string topPhoto =
+  std::string cmd0    = "rpicam-jpeg --camera 0";
+  std::string cmd1    = "rpicam-jpeg --camera 1";
+  std::string np      = " --nopreview";
+  std::string res     = " --width 4608 --height 2592";
+  std::string out     = " --output ";
+  std::string timeout = " --timeout 50"; // DO NOT SET TO 0! Will cause infinite preview!
+  std::string topPhotoPath =
       this->imageDirectory.string() + std::to_string(angle) + "_top.jpg";
-  std::string sidePhoto =
+  std::string sidePhotoPath =
       this->imageDirectory.string() + std::to_string(angle) + "_side.jpg";
 
-  std::string command0 = cmd0 + np + res + out + topPhoto + to;
-  std::string command1 = cmd0 + np + res + out + sidePhoto + to;
+  std::string command0 = cmd0 + np + res + out + topPhotoPath + timeout;
+  std::string command1 = cmd0 + np + res + out + sidePhotoPath + timeout;
   system(command0.c_str());
   system(command1.c_str());
 
   this->logger.log("Photos successfully captured at position: " + std::to_string(angle));
+  this->logger.log("Top photo saved to: " + topPhotoPath);
+  this->logger.log("Side photo saved to: " + sidePhotoPath);
   this->logger.log("Exiting takePhotos at angle: " + std::to_string(angle));
   // Always returns true
   return true;
 }
 
-/*
+/**
  * Test Function
  * Captures a photo at the given angle and saves it to the image directory
  *
