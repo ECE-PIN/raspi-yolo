@@ -182,6 +182,9 @@ def performOCR(image):
             textResults = reader.readtext(processedImage, detail=0, paragraph=True, text_threshold=0.5)
             # no package or bottle detected. maybe PLU?
             print("Scan complete.")
+            print("----Text found----")
+            print(textResults)
+            print("------------------")
             for text in textResults:
                 classification = isPLUClass(text)
                 if classification:
