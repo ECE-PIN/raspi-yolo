@@ -94,6 +94,7 @@ std::string DisplayHandler::startSignalToHardware() {
   try {
     this->logger.log("Requesting that hardware start scan");
     this->requestHardwareSocket.send(Messages::START_SCAN);
+    this->logger.log("Start scan message sent to hardware, waiting for response");
 
     std::string hardwareResponse;
     this->requestHardwareSocket.receive(hardwareResponse);
