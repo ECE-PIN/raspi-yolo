@@ -50,7 +50,7 @@ bool Hardware::checkStartSignal(int timeoutMs) {
     this->logger.log("reply socket added to zmq poller, polling");
 
     if (poller.poll(timeoutMs)) {
-      this->logger.log() if (poller.has_input(this->replySocket)) {
+      if (poller.has_input(this->replySocket)) {
         bool nonzeroWeight          = false;
         bool zeroWeightDecisionMade = false;
         while (nonzeroWeight == false && zeroWeightDecisionMade == false) {
