@@ -138,7 +138,7 @@ void DisplayHandler::handleScanStarted() {
 }
 
 /**
- * Handle the failure of a scan.
+ * Handle the failure of a scan..
  *
  * @param None
  * @return None
