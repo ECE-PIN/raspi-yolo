@@ -69,7 +69,7 @@ AnalyzeObjectReturn ImageProcessor::analyze() {
 
     processImagePair(i, classifyObjectReturn);
 
-    if (classifyObjectReturn.foodItem && classifyObjectReturn.expirationDate) {
+    if (classifyObjectReturn.foodItem || classifyObjectReturn.expirationDate) {
       this->logger.log(
           "Both food item and expiration date detected. Returning to processor.");
       std::filesystem::path imagePath =
