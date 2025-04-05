@@ -44,7 +44,7 @@ void Panel::addText(const std::string& fontPath,
                     const SDL_Color& color,
                     const SDL_Point& relativePosition) {
   SDL_Rect textRectangle     = {relativePosition.x, relativePosition.y, 0, 0};
-  std::unique_ptr<Text> text = std::make_unique<Text>(this->displayGlobal, textRectangle,
+  std::shared_ptr<Text> text = std::make_shared<Text>(this->displayGlobal, textRectangle,
                                                       fontPath, content, fontSize, color);
 
   addElement(std::move(text));
@@ -61,7 +61,7 @@ void Panel::addFoodItem(const FoodItem& foodItem, const SDL_Point& relativePosit
   addFoodItemName(foodItem, relativePosition);
   addFoodItemExpirationDate(foodItem, relativePosition);
 
-  std::unique_ptr<NumberSetting> itemQuantity = std::make_unique<NumberSetting>(
+  std::shared_ptr<NumberSetting> itemQuantity = std::make_shared<NumberSetting>(
       this->displayGlobal, SDL_Rect{0, 0, 0, 0}, this->id, this->logFile);
   addElement(std::move(itemQuantity));
 }

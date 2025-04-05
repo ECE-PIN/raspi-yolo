@@ -22,6 +22,7 @@ Scanning::Scanning(struct DisplayGlobal displayGlobal) : logger(LogFiles::SCANNI
   this->currentState  = EngineState::SCANNING;
   this->displayGlobal = displayGlobal;
   this->windowSurface = SDL_GetWindowSurface(this->displayGlobal.window);
+  assert(this->windowSurface != NULL);
 
   // Root element
   SDL_Rect rootRectangle = {0, 0, this->windowSurface->w, this->windowSurface->h};

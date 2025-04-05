@@ -42,8 +42,9 @@ void CompositeElement::addElement(std::shared_ptr<Element> element) {
   }
 
   Element* childPointer = element.get();
-  this->children.push_back(std::move(element));
   childPointer->setParent(this);
+
+  this->children.push_back(std::move(element));
 }
 
 /**

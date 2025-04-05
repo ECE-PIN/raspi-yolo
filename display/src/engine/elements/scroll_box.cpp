@@ -90,14 +90,13 @@ void ScrollBox::renderSelf() const {}
  * @return None
  */
 void ScrollBox::refreshPanels() {
-  // std::vector<FoodItem> allFoodItems = readAllFoodItems();
   std::vector<FoodItem> allFoodItems = readAllFoodItemsSorted(this->sortMethod);
 
   this->children.clear();
   SDL_Rect boundaryRectangle = {0, topPanelPosition, 0, this->panelHeight};
 
   for (auto& foodItem : allFoodItems) {
-    std::unique_ptr<Panel> newPanel = std::make_unique<Panel>(
+    std::shared_ptr<Panel> newPanel = std::make_shared<Panel>(
         this->displayGlobal, boundaryRectangle, foodItem.getId(), this->logFile);
     boundaryRectangle.y += panelHeight;
 
