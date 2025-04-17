@@ -321,7 +321,7 @@ bool Hardware::takePhotos(int angle) {
       this->imageDirectory.string() + std::to_string(angle) + "_side.jpg";
 
   const std::string command0 = cmd0 + np + res + out + topPhoto + to;
-  const std::string command1 = cmd0 + np + res + out + sidePhoto + to;
+  const std::string command1 = cmd1 + np + res + out + sidePhoto + to;
   system(command0.c_str());
   system(command1.c_str());
 
@@ -346,21 +346,21 @@ void Hardware::rotateMotor(bool clockwise) {
   this->logger.log("Rotating platform");
   if (clockwise) {
     this->logger.log("Rotating clockwise.");
-    digitalWrite(MOTOR_IN1, HIGH);
-    digitalWrite(MOTOR_IN2, LOW);
+    digitalWrite(motor_in1, HIGH);
+    digitalWrite(motor_in2, LOW);
     // pwmWrite(MOTOR_ENA, 255); // Adjust speed
-    usleep(1875000); // Rotate duration
-    digitalWrite(MOTOR_IN1, LOW);
-    digitalWrite(MOTOR_IN2, LOW); // HIGH,HIGH || LOW,LOW == off
+    usleep(922852); // Rotate duration
+    digitalWrite(motor_in1, LOW);
+    digitalWrite(motor_in2, LOW); // HIGH,HIGH || LOW,LOW == off
   }
   else {
     this->logger.log("Rotating counter-clockwise.");
-    digitalWrite(MOTOR_IN1, LOW);
-    digitalWrite(MOTOR_IN2, HIGH);
+    digitalWrite(motor_in1, LOW);
+    digitalWrite(motor_in2, HIGH);
     // pwmWrite(MOTOR_ENA, 255);
-    usleep(1875000);
-    digitalWrite(MOTOR_IN1, LOW);
-    digitalWrite(MOTOR_IN2, LOW);
+    usleep(922852); // Rotate duration
+    digitalWrite(motor_in1, LOW);
+    digitalWrite(motor_in2, LOW);
   }
   this->logger.log("Platform successfully rotated");
 }

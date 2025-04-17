@@ -6,10 +6,6 @@
 #include "../../endpoints.h"
 #include "../../logger.h"
 
-#define MOTOR_IN1 23 // GPIO Pin for L298N IN1
-#define MOTOR_IN2 24 // GPIO Pin for L298N IN2
-#define MOTOR_ENA 18 // GPIO Pin forL298N enable (PWM Speed Control)
-
 // TODO Figure out a better way to represent the photo path
 //
 // There is the constant below IMAGE_DIRECTORY but ../images/temp is also
@@ -34,7 +30,10 @@ private:
 
   std::filesystem::path imageDirectory;
 
-  float itemWeight = 0;
+  float itemWeight    = 0;
+  const int motor_in1 = 23; // GPIO Pin for L298N IN1
+  const int motor_in2 = 24; // GPIO Pin for L298N IN2
+  // const int motor_ena = 18; // GPIO Pin forL298N enable (PWM Speed Control)
 
   bool usingMotor;
   bool usingCamera;
