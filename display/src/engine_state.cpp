@@ -10,6 +10,8 @@ std::string engineStateToString(EngineState engineState) {
     return "ZERO_WEIGHT";
   case EngineState::CANCEL_SCAN_CONFIRMATION:
     return "CANCEL_SCAN_CONFIRMATION";
+  case EngineState::SCAN_SUCCESS:
+    return "SCAN_SUCCESS";
   default:
     return "UNKNOWN";
   }

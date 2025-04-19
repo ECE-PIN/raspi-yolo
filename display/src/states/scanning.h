@@ -16,15 +16,15 @@
  */
 class Scanning : public State {
 public:
-  Scanning(struct DisplayGlobal displayGlobal);
-  EngineState checkKeystates();
+  Scanning(const DisplayGlobal& displayGlobal, const EngineState& state);
+  void handleEvents(bool* displayIsRunning) override;
   void update() override;
   void render() const override;
+  void exit() override;
 
 private:
   Logger logger;
 
-  SDL_Surface* windowSurface;
   Bird* birdPtr = nullptr;
   std::vector<ObstaclePair*> obstaclePairs;
   int score = 0;

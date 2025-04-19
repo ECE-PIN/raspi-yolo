@@ -5,11 +5,13 @@
 
 class ZeroWeight : public State {
 public:
-  ZeroWeight(struct DisplayGlobal displayGlobal);
+  ZeroWeight(const DisplayGlobal& displayGlobal, const EngineState& state);
   void render() const override;
 
   void setRetryScan(bool retryScan);
   bool getRetryScan();
+
+  void exit() override;
 
 private:
   Logger logger;

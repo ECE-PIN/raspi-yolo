@@ -5,6 +5,7 @@
 
 #include "../display_global.h"
 #include "../sdl_debug.h"
+#include "../sql_food.h"
 #include "button.h"
 #include "element.h"
 #include "panel.h"
@@ -14,17 +15,31 @@
  * @param displayGlobal
  * @param boundaryRectangle Rectangle defining offset within parent (if any) and width +
  * height
- * @param settingId The primary key of the food item corresponding to this panel
+ * @param id The primary key of the food item corresponding to this panel
+ * @param logFile Logfile to write logs to
  */
-Panel::Panel(struct DisplayGlobal displayGlobal,
-             const SDL_Rect& boundaryRectangle,
-             const int& id,
+Panel::Panel(struct DisplayGlobal& displayGlobal,
+             const SDL_Rect boundaryRectangle,
+             const int id,
              const std::string& logFile)
     : id(id) {
   this->displayGlobal = displayGlobal;
   setupPosition(boundaryRectangle);
   this->logger  = std::make_unique<Logger>(logFile);
   this->logFile = logFile;
+}
+
+/**
+ * Set a new id. Updates information within the panel according to the new id.
+ *
+ * @param id The new id
+ * @return None
+ */
+void Panel::setId(const int id) {
+  this->id = id;
+  removeAllChildren();
+  FoodItem foodItem = readFoodItemById(this->id);
+  addFoodItem(foodItem, SDL_Point{0, 0});
 }
 
 /**
@@ -46,7 +61,6 @@ void Panel::addText(const std::string& fontPath,
   SDL_Rect textRectangle     = {relativePosition.x, relativePosition.y, 0, 0};
   std::shared_ptr<Text> text = std::make_shared<Text>(this->displayGlobal, textRectangle,
                                                       fontPath, content, fontSize, color);
-
   addElement(std::move(text));
 }
 
@@ -62,7 +76,7 @@ void Panel::addFoodItem(const FoodItem& foodItem, const SDL_Point& relativePosit
   addFoodItemExpirationDate(foodItem, relativePosition);
 
   std::shared_ptr<NumberSetting> itemQuantity = std::make_shared<NumberSetting>(
-      this->displayGlobal, SDL_Rect{0, 0, 0, 0}, this->id, this->logFile);
+      this->displayGlobal, SDL_Rect{0, 0, 0, 0}, this->logFile, this->id);
   addElement(std::move(itemQuantity));
 }
 

@@ -16,29 +16,22 @@
 /**
  * @param displayGlobal Global variables
  */
-Scanning::Scanning(struct DisplayGlobal displayGlobal) : logger(LogFiles::SCANNING) {
+Scanning::Scanning(const DisplayGlobal& displayGlobal, const EngineState& state)
+    : State(displayGlobal, state), logger(LogFiles::SCANNING) {
   this->logger.log("Constructing scanning state");
 
-  this->currentState  = EngineState::SCANNING;
-  this->displayGlobal = displayGlobal;
-  this->windowSurface = SDL_GetWindowSurface(this->displayGlobal.window);
-  assert(this->windowSurface != NULL);
-
-  // Root element
-  SDL_Rect rootRectangle = {0, 0, this->windowSurface->w, this->windowSurface->h};
-  this->rootElement      = std::make_unique<Container>(rootRectangle);
-
-  // Scan message
-  const char* progressMessageContent    = "Scanning In Progress";
-  SDL_Color progressMessageColor        = {0, 255, 0, 255}; // Green
-  SDL_Rect progressMessageRectangle     = {0, 100, 0, 0};
-  std::unique_ptr<Text> progressMessage = std::make_unique<Text>(
+  this->logger.log("Constructing scan message");
+  const std::string progressMessageContent = "Scanning In Progress";
+  const SDL_Color progressMessageColor     = {0, 255, 0, 255}; // Green
+  const SDL_Rect progressMessageRectangle  = {0, 100, 0, 0};
+  std::unique_ptr<Text> progressMessage    = std::make_unique<Text>(
       this->displayGlobal, progressMessageRectangle, DisplayGlobal::futuramFontPath,
       progressMessageContent, 24, progressMessageColor);
   progressMessage->setCenteredHorizontal();
   this->rootElement->addElement(std::move(progressMessage));
+  this->logger.log("Scan message constructed");
 
-  // Cancel scan
+  this->logger.log("Constructing cancel scan button");
   SDL_Rect cancelScanButtonRectangle       = {0, 150, 0, 0};
   std::unique_ptr<Button> cancelScanButton = std::make_unique<Button>(
       this->displayGlobal, cancelScanButtonRectangle, "Cancel Scan", SDL_Point{10, 10},
@@ -46,8 +39,9 @@ Scanning::Scanning(struct DisplayGlobal displayGlobal) : logger(LogFiles::SCANNI
       LogFiles::SCANNING);
   cancelScanButton->setCenteredHorizontal();
   rootElement->addElement(std::move(cancelScanButton));
+  this->logger.log("Cancel scan button constructed");
 
-  // Loading bar
+  this->logger.log("Constructing loading bar");
   SDL_Rect loadingBarRectangle           = {0, 200, 200, 30};
   int loadingBarBorderThickness          = 3;
   float totalTimeSeconds                 = 20;
@@ -57,26 +51,33 @@ Scanning::Scanning(struct DisplayGlobal displayGlobal) : logger(LogFiles::SCANNI
       totalTimeSeconds, updatePeriodMs, LogFiles::SCANNING);
   loadingBar->setCenteredHorizontal();
   rootElement->addElement(std::move(loadingBar));
+  this->logger.log("Loading bar constructed");
 
+  this->logger.log("Constructing bird");
   SDL_Rect birdRectangle     = {0, 0, 32, 32};
   std::unique_ptr<Bird> bird = std::make_unique<Bird>(this->displayGlobal, birdRectangle);
   birdPtr                    = bird.get();
   rootElement->addElement(std::move(bird));
+  this->logger.log("Bird constructed");
 
   initializeObstacles();
 
   this->logger.log("Constructed scanning state");
 }
 
-/**
- * Perform the appropriate action depending on which keyboard key has been pressed.
- *
- * @param None
- * @return The state the display is in after checking if any keys have been pressed
- */
-EngineState Scanning::checkKeystates() {
-  const Uint8* keystates = SDL_GetKeyboardState(NULL);
-  return EngineState::SCANNING;
+void Scanning::handleEvents(bool* displayIsRunning) {
+  SDL_Event event;
+  while (SDL_PollEvent(&event) != 0) { // While there are events in the queue
+    if (event.type == SDL_QUIT) {
+      *displayIsRunning = false;
+      break;
+    }
+    else {
+      this->rootElement->handleEvent(event);
+    }
+  }
+
+  this->currentState = this->displayHandler.checkDetectionResults(this->currentState);
 }
 
 /**
@@ -163,3 +164,5 @@ void Scanning::handleBirdCollision() {
     }
   }
 }
+
+void Scanning::exit() {}

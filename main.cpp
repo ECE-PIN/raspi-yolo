@@ -24,7 +24,6 @@ int main(int argc, char* argv[]) {
 
   bool usingMotor  = true;
   bool usingCamera = true;
-
   checkCommandLineArgs(argc, argv, usingMotor, usingCamera);
 
   int displayPid = initDisplay(context, mainLogger);

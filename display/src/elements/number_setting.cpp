@@ -17,8 +17,8 @@
  */
 NumberSetting::NumberSetting(struct DisplayGlobal displayGlobal,
                              const SDL_Rect& boundaryRectangle,
-                             int settingId,
-                             const std::string& logFile)
+                             const std::string& logFile,
+                             const int settingId)
     : settingId(settingId) {
   setupPosition(boundaryRectangle);
   this->logger  = std::make_unique<Logger>(logFile);
@@ -39,9 +39,14 @@ NumberSetting::NumberSetting(struct DisplayGlobal displayGlobal,
       [this]() { this->settingValue++; }, this->logFile);
   addElement(std::move(increaseButton));
 
-  FoodItem foodItem  = readFoodItemById(this->settingId);
-  this->settingValue = foodItem.getQuantity();
-  this->children[1]->setContent(std::to_string(this->settingValue));
+  if (settingId != -1) {
+    FoodItem foodItem  = readFoodItemById(this->settingId);
+    this->settingValue = foodItem.getQuantity();
+    this->children[1]->setContent(std::to_string(this->settingValue));
+  }
+  else {
+    this->settingValue = 0;
+  }
 }
 
 /**
@@ -75,17 +80,22 @@ void NumberSetting::updateSelf() {
     this->children[i]->setPositionRelativeToParent(childRelativePosition);
   }
 
-  FoodItem foodItem    = readFoodItemById(this->settingId);
-  int foodItemQuantity = foodItem.getQuantity();
-  if (foodItemQuantity == 0) {
-    deleteById(this->settingId);
+  if (this->settingId != -1) {
+    FoodItem foodItem    = readFoodItemById(this->settingId);
+    int foodItemQuantity = foodItem.getQuantity();
+    if (foodItemQuantity == 0) {
+      deleteById(this->settingId);
+    }
+    else if (foodItemQuantity != this->settingValue) {
+      updateFoodItemQuantity(this->settingId, this->settingValue);
+    }
+    /*
+    else {
+      this->children[1]->setContent(std::to_string(this->settingValue));
+    }
+  */
   }
-  else if (foodItemQuantity != this->settingValue) {
-    updateFoodItemQuantity(this->settingId, this->settingValue);
-  }
-  else {
-    this->children[1]->setContent(std::to_string(this->settingValue));
-  }
+  this->children[1]->setContent(std::to_string(this->settingValue));
 }
 
 void NumberSetting::handleEventSelf(const SDL_Event& event) {}

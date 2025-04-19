@@ -8,6 +8,8 @@
 #include "fooditem.pb.h"
 #include "sql_food.h"
 
+DisplayHandler* DisplayHandler::s_instance = nullptr;
+
 /**
  * @param context The zeroMQ context with which to create sockets with
  */
@@ -106,7 +108,7 @@ std::string DisplayHandler::receiveMessage(const std::string& response,
  * @param None
  * @return None
  */
-void DisplayHandler::detectionSuccess() {
+FoodItem DisplayHandler::detectionSuccess() {
   this->logger.log("Item detection succeeded, receiving food item");
 
   FoodItem foodItem;
@@ -115,14 +117,106 @@ void DisplayHandler::detectionSuccess() {
     foodItemReceived =
         receiveFoodItem(this->replySocket, Messages::AFFIRMATIVE, foodItem);
   }
-
   this->logger.log("Food item received: ");
   foodItem.logToFile(this->logger);
 
-  this->logger.log("Storing food item in database");
-  sqlite3* database = nullptr;
-  openDatabase(&database);
-  storeFoodItem(database, foodItem);
-  sqlite3_close(database);
-  this->logger.log("Food item stored in database");
+  return foodItem;
+}
+
+/**
+ * If there is no weight on the platform, the user is given the chance to decide what they
+ * want to do. Once the user has decided what they want to do, this function sends their
+ * decision to hardware.
+ *
+ * @param zeroWeightChoice What the user wants to do about no weight detected.
+ * @return None
+ */
+void DisplayHandler::zeroWeightChoiceToHardware(const std::string& zeroWeightChoice) {
+  this->logger.log("Sending zero weight choice: " + zeroWeightChoice + " to hardware");
+
+  std::string hardwareResponse =
+      sendMessage(zeroWeightChoice, ExternalEndpoints::hardwareEndpoint);
+
+  if (hardwareResponse == Messages::AFFIRMATIVE) {
+    this->logger.log(
+        "Zero weight choice successfully sent to hardware, switching to scanning state");
+  }
+  else {
+    this->logger.log("Invalid response received from hardware: " + hardwareResponse);
+    LOG(FATAL) << "Invalid response received from hardware: " << hardwareResponse;
+  }
+}
+
+/**
+ * Indicate to vision that the user requested that the scan be cancelled.
+ *
+ * @param None
+ * @return None
+ */
+void DisplayHandler::scanCancelledToVision() {
+  this->logger.log("Scan cancelled, sending scan cancelled message to vision");
+
+  std::string visionResponse =
+      sendMessage(Messages::SCAN_CANCELLED, ExternalEndpoints::visionEndpoint);
+
+  this->logger.log("Received response from vision");
+  if (visionResponse == Messages::AFFIRMATIVE) {
+    this->logger.log("Vision received scan cancelled message");
+  }
+  else {
+    this->logger.log("Invalid response received from vision: " + visionResponse);
+    LOG(FATAL) << "Invalid response received from vision: " << visionResponse;
+  }
+}
+
+EngineState DisplayHandler::startToHardware() {
+  this->logger.log("Scan initialized, sending start signal to hardware");
+
+  std::string hardwareResponse =
+      sendMessage(Messages::START_SCAN, ExternalEndpoints::hardwareEndpoint);
+
+  if (hardwareResponse == Messages::AFFIRMATIVE) {
+    this->logger.log("Hardware starting scan");
+    return EngineState::SCANNING;
+  }
+  else if (hardwareResponse == Messages::ZERO_WEIGHT) {
+    this->logger.log("Hardware indicated zero weight on platform");
+    return EngineState::ZERO_WEIGHT;
+  }
+  else {
+    this->logger.log("Invalid response received from hardware: " + hardwareResponse);
+    LOG(FATAL) << "Invalid response received from hardware: " << hardwareResponse;
+  }
+}
+
+EngineState DisplayHandler::checkDetectionResults(EngineState currentState) {
+  const std::string response = Messages::AFFIRMATIVE;
+  const int receiveTimeoutMs = 1;
+  std::string visionRequest  = receiveMessage(response, receiveTimeoutMs);
+  if (visionRequest == "null") {
+    return currentState;
+  }
+
+  if (visionRequest == Messages::ITEM_DETECTION_SUCCEEDED) {
+    this->logger.log("New food item received, switching to scan success state");
+    return EngineState::SCAN_SUCCESS;
+  }
+  else if (visionRequest == Messages::ITEM_DETECTION_FAILED) {
+    this->logger.log("Item detection failed, switching to item list state");
+    return EngineState::ITEM_LIST;
+  }
+  else {
+    this->logger.log("Invalid request received from vision: " + visionRequest);
+    LOG(FATAL) << "Invalid request received from vision: " << visionRequest;
+  }
+}
+
+void DisplayHandler::ignoreVision() {
+  const std::string response = Messages::AFFIRMATIVE;
+  const int receiveTimeoutMs = 1;
+  std::string request        = receiveMessage(response, receiveTimeoutMs);
+  if (request == "null" || request == Messages::ITEM_DETECTION_SUCCEEDED ||
+      request == Messages::ITEM_DETECTION_FAILED) {
+    ;
+  }
 }

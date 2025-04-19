@@ -26,8 +26,10 @@ DisplayEngine::DisplayEngine(const char* windowTitle,
                              int screenHeight,
                              bool fullscreen,
                              const zmqpp::context& context)
-    : logger("display_engine.txt"), displayHandler(context) {
+    : logger("display_engine.txt") {
   this->logger.log("Constructing display engine");
+
+  DisplayHandler::init(context);
 
   this->displayGlobal.window = setupWindow(windowTitle, windowXPosition, windowYPosition,
                                            screenWidth, screenHeight, fullscreen);
@@ -35,14 +37,42 @@ DisplayEngine::DisplayEngine(const char* windowTitle,
   initializeEngine(this->displayGlobal.window);
 
   // States
-  this->scanning   = std::make_unique<Scanning>(this->displayGlobal);
-  this->itemList   = std::make_unique<ItemList>(this->displayGlobal);
-  this->zeroWeight = std::make_unique<ZeroWeight>(this->displayGlobal);
-  this->cancelScanConfirmation =
-      std::make_unique<CancelScanConfirmation>(this->displayGlobal);
+  this->scanning = std::make_unique<Scanning>(this->displayGlobal, EngineState::SCANNING);
+  this->itemList =
+      std::make_unique<ItemList>(this->displayGlobal, EngineState::ITEM_LIST);
+  this->zeroWeight =
+      std::make_unique<ZeroWeight>(this->displayGlobal, EngineState::ZERO_WEIGHT);
+  this->cancelScanConfirmation = std::make_unique<CancelScanConfirmation>(
+      this->displayGlobal, EngineState::CANCEL_SCAN_CONFIRMATION);
+  this->scanSuccess =
+      std::make_unique<ScanSuccess>(this->displayGlobal, EngineState::SCAN_SUCCESS);
+
+  this->engineState = this->itemList.get();
 
   displayIsRunning = true;
   this->logger.log("Engine is constructed and now running");
+}
+
+void DisplayEngine::start() {
+  LOG(INFO) << "SDL display process started successfully";
+
+  std::chrono::milliseconds msPerFrame = std::chrono::milliseconds(16);
+
+  while (this->displayIsRunning) {
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+
+    handleEvents();
+    handleStateChange();
+    update();
+    renderState();
+
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    std::chrono::milliseconds sleepDuration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(start + msPerFrame - now);
+    std::this_thread::sleep_for(sleepDuration);
+  }
+
+  clean();
 }
 
 /**
@@ -124,130 +154,37 @@ void DisplayEngine::initializeEngine(SDL_Window* window) {
   this->logger.log("Engine initialized");
 }
 
-void DisplayEngine::start() {
-  LOG(INFO) << "SDL display process started successfully";
+void DisplayEngine::handleStateChange() {
+  if (this->engineState->checkStateChange()) {
+    this->engineState->exit();
+    EngineState currentState = this->engineState->getCurrentState();
 
-  std::chrono::milliseconds msPerFrame = std::chrono::milliseconds(16);
+    switch (currentState) {
+    case EngineState::SCANNING:
+      this->engineState = this->scanning.get();
+      break;
 
-  while (this->displayIsRunning) {
-    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+    case EngineState::ITEM_LIST:
+      this->engineState = this->itemList.get();
+      break;
 
-    handleEvents();
-    checkState();
-    checkKeystates();
-    checkState();
-    update();
-    renderState();
+    case EngineState::ZERO_WEIGHT:
+      this->engineState = this->zeroWeight.get();
+      break;
 
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-    std::chrono::milliseconds sleepDuration =
-        std::chrono::duration_cast<std::chrono::milliseconds>(start + msPerFrame - now);
-    std::this_thread::sleep_for(sleepDuration);
+    case EngineState::CANCEL_SCAN_CONFIRMATION:
+      this->engineState = this->cancelScanConfirmation.get();
+      break;
+
+    case EngineState::SCAN_SUCCESS:
+      this->engineState = this->scanSuccess.get();
+      break;
+
+    default:
+      break;
+    }
+    this->engineState->enter();
   }
-
-  clean();
-}
-
-/**
- * Check if the current state has requested a state switch.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::checkState() {
-  switch (this->engineState) {
-  case EngineState::SCANNING:
-    checkScanning();
-    break;
-
-  case EngineState::ITEM_LIST:
-    checkItemList();
-    break;
-
-  case EngineState::ZERO_WEIGHT:
-    checkZeroWeight();
-    break;
-
-  case EngineState::CANCEL_SCAN_CONFIRMATION:
-    checkCancelScanConfirmation();
-    break;
-
-  default:
-    this->logger.log("Invalid state: " + engineStateToString(this->engineState));
-    LOG(FATAL) << "Invalid state: " << engineStateToString(this->engineState);
-    break;
-  }
-}
-
-/**
- * Check if the scanning state has requested a state switch.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::checkScanning() {
-  this->engineState = this->scanning->getCurrentState();
-
-  this->scanning->setCurrentState(EngineState::SCANNING);
-}
-
-/**
- * Check if the item list state has requested a state switch.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::checkItemList() {
-  this->engineState = this->itemList->getCurrentState();
-
-  if (this->engineState == EngineState::SCANNING) {
-    startToHardware();
-  }
-
-  this->itemList->setCurrentState(EngineState::ITEM_LIST);
-}
-
-/**
- * Check if the zero weight state has requested a state switch.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::checkZeroWeight() {
-  this->engineState = this->zeroWeight->getCurrentState();
-
-  // Override
-  if (this->engineState == EngineState::SCANNING) {
-    zeroWeightChoiceToHardware(Messages::OVERRIDE);
-  }
-  // Cancel
-  else if (this->engineState == EngineState::ITEM_LIST) {
-    zeroWeightChoiceToHardware(Messages::CANCEL);
-  }
-  // Retry
-  else if (this->zeroWeight->getRetryScan()) {
-    zeroWeightChoiceToHardware(Messages::RETRY);
-    this->zeroWeight->setRetryScan(false);
-    startToHardware();
-  }
-
-  this->zeroWeight->setCurrentState(EngineState::ZERO_WEIGHT);
-}
-
-/**
- * Check if the cancel scan confirmation state has requested a state switch.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::checkCancelScanConfirmation() {
-  this->engineState = this->cancelScanConfirmation->getCurrentState();
-
-  if (this->engineState == EngineState::ITEM_LIST) { // Scan was cancelled
-    scanCancelledToVision();
-  }
-
-  this->cancelScanConfirmation->setCurrentState(EngineState::CANCEL_SCAN_CONFIRMATION);
 }
 
 /**
@@ -258,90 +195,7 @@ void DisplayEngine::checkCancelScanConfirmation() {
  * @return None
  */
 void DisplayEngine::handleEvents() {
-  switch (this->engineState) {
-  case EngineState::SCANNING:
-    {
-      this->scanning->handleEvents(&this->displayIsRunning);
-
-      const std::string response = Messages::AFFIRMATIVE;
-      const int receiveTimeoutMs = 1;
-      std::string visionRequest =
-          this->displayHandler.receiveMessage(response, receiveTimeoutMs);
-      if (visionRequest == "null") {
-        break;
-      }
-
-      if (visionRequest == Messages::ITEM_DETECTION_SUCCEEDED) {
-        this->logger.log("New food item received, switching to item list state");
-        this->displayHandler.detectionSuccess();
-        this->engineState = EngineState::ITEM_LIST;
-      }
-      else if (visionRequest == Messages::ITEM_DETECTION_FAILED) {
-        this->logger.log("Item detection failed, switching to item list state");
-        this->engineState = EngineState::ITEM_LIST;
-      }
-      else {
-        this->logger.log("Invalid request received from vision: " + visionRequest);
-        LOG(FATAL) << "Invalid request received from vision: " << visionRequest;
-      }
-      break;
-    }
-
-  case EngineState::ITEM_LIST:
-    {
-      this->itemList->handleEvents(&this->displayIsRunning);
-
-      const std::string response = Messages::AFFIRMATIVE;
-      const int receiveTimeoutMs = 1;
-      std::string request =
-          this->displayHandler.receiveMessage(response, receiveTimeoutMs);
-      if (request == "null" || request == Messages::ITEM_DETECTION_SUCCEEDED ||
-          request == Messages::ITEM_DETECTION_FAILED) {
-        break;
-      }
-      break;
-    }
-  case EngineState::ZERO_WEIGHT:
-    this->zeroWeight->handleEvents(&this->displayIsRunning);
-    break;
-
-  case EngineState::CANCEL_SCAN_CONFIRMATION:
-    this->cancelScanConfirmation->handleEvents(&this->displayIsRunning);
-    break;
-
-  default:
-    LOG(FATAL) << "Invalid state";
-    break;
-  }
-}
-
-/**
- * Check the current state of the display and call that state's method to check the
- * key states.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::checkKeystates() {
-  switch (this->engineState) {
-  case EngineState::SCANNING:
-    this->engineState = this->scanning->checkKeystates();
-    break;
-
-  case EngineState::ITEM_LIST:
-    this->engineState = this->itemList->checkKeystates();
-    break;
-
-  case EngineState::ZERO_WEIGHT:
-    break;
-
-  case EngineState::CANCEL_SCAN_CONFIRMATION:
-    break;
-
-  default:
-    LOG(FATAL) << "Invalid state " << engineStateToString(this->engineState);
-    break;
-  }
+  this->engineState->handleEvents(&this->displayIsRunning);
 }
 
 /**
@@ -352,29 +206,7 @@ void DisplayEngine::checkKeystates() {
  * @param None
  * @return None
  */
-void DisplayEngine::update() {
-  switch (this->engineState) {
-  case EngineState::SCANNING:
-    this->scanning->update();
-    break;
-
-  case EngineState::ITEM_LIST:
-    this->itemList->update();
-    break;
-
-  case EngineState::ZERO_WEIGHT:
-    this->zeroWeight->update();
-    break;
-
-  case EngineState::CANCEL_SCAN_CONFIRMATION:
-    this->cancelScanConfirmation->update();
-    break;
-
-  default:
-    LOG(FATAL) << "Invalid state";
-    break;
-  }
-}
+void DisplayEngine::update() { this->engineState->update(); }
 
 /**
  * Check current state and call that state's function to render.
@@ -382,29 +214,7 @@ void DisplayEngine::update() {
  * @param None
  * @return None
  */
-void DisplayEngine::renderState() {
-  switch (this->engineState) {
-  case EngineState::SCANNING:
-    this->scanning->render();
-    break;
-
-  case EngineState::ITEM_LIST:
-    this->itemList->render();
-    break;
-
-  case EngineState::ZERO_WEIGHT:
-    this->zeroWeight->render();
-    break;
-
-  case EngineState::CANCEL_SCAN_CONFIRMATION:
-    this->cancelScanConfirmation->render();
-    break;
-
-  default:
-    LOG(FATAL) << "Invalid state";
-    break;
-  }
-}
+void DisplayEngine::renderState() { this->engineState->render(); }
 
 /**
  * Free SDL resources and quit.
@@ -417,76 +227,4 @@ void DisplayEngine::clean() {
   SDL_DestroyRenderer(this->displayGlobal.renderer);
   SDL_Quit();
   LOG(INFO) << "DisplayEngine cleaned";
-}
-
-/**
- * Indicate to vision that the user requested that the scan be cancelled.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::scanCancelledToVision() {
-  this->logger.log("Scan cancelled, sending scan cancelled message to vision");
-
-  std::string visionResponse = this->displayHandler.sendMessage(
-      Messages::SCAN_CANCELLED, ExternalEndpoints::visionEndpoint);
-
-  this->logger.log("Received response from vision");
-  if (visionResponse == Messages::AFFIRMATIVE) {
-    this->logger.log("Vision received scan cancelled message");
-  }
-  else {
-    this->logger.log("Invalid response received from vision: " + visionResponse);
-    LOG(FATAL) << "Invalid response received from vision: " << visionResponse;
-  }
-}
-
-/**
- * Indicate to hardware that the user would like to scan a new item.
- *
- * @param None
- * @return None
- */
-void DisplayEngine::startToHardware() {
-  this->logger.log("Scan initialized, sending start signal to hardware");
-
-  std::string hardwareResponse = this->displayHandler.sendMessage(
-      Messages::START_SCAN, ExternalEndpoints::hardwareEndpoint);
-
-  if (hardwareResponse == Messages::AFFIRMATIVE) {
-    this->logger.log("Hardware starting scan");
-  }
-  else if (hardwareResponse == Messages::ZERO_WEIGHT) {
-    this->logger.log(
-        "Hardware indicated zero weight on platform, switching to zero weight state");
-    this->engineState = EngineState::ZERO_WEIGHT;
-  }
-  else {
-    this->logger.log("Invalid response received from hardware: " + hardwareResponse);
-    LOG(FATAL) << "Invalid response received from hardware: " << hardwareResponse;
-  }
-}
-
-/**
- * If there is no weight on the platform, the user is given the chance to decide what they
- * want to do. Once the user has decided what they want to do, this function sends their
- * decision to hardware.
- *
- * @param zeroWeightChoice What the user wants to do about no weight detected.
- * @return None
- */
-void DisplayEngine::zeroWeightChoiceToHardware(const std::string& zeroWeightChoice) {
-  this->logger.log("Sending zero weight choice: " + zeroWeightChoice + " to hardware");
-
-  std::string hardwareResponse = this->displayHandler.sendMessage(
-      zeroWeightChoice, ExternalEndpoints::hardwareEndpoint);
-
-  if (hardwareResponse == Messages::AFFIRMATIVE) {
-    this->logger.log(
-        "Zero weight choice successfully sent to hardware, switching to scanning state");
-  }
-  else {
-    this->logger.log("Invalid response received from hardware: " + hardwareResponse);
-    LOG(FATAL) << "Invalid response received from hardware: " << hardwareResponse;
-  }
 }

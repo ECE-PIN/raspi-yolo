@@ -3,18 +3,10 @@
 #include "../log_files.h"
 #include "cancel_scan_confirmation.h"
 
-CancelScanConfirmation::CancelScanConfirmation(struct DisplayGlobal displayGlobal)
-    : logger(LogFiles::CANCEL_SCAN_CONFIRMATION) {
+CancelScanConfirmation::CancelScanConfirmation(const DisplayGlobal& displayGlobal,
+                                               const EngineState& state)
+    : State(displayGlobal, state), logger(LogFiles::CANCEL_SCAN_CONFIRMATION) {
   this->logger.log("Constructing cancel scan confirmation state");
-
-  this->currentState         = EngineState::CANCEL_SCAN_CONFIRMATION;
-  this->displayGlobal        = displayGlobal;
-  SDL_Surface* windowSurface = SDL_GetWindowSurface(this->displayGlobal.window);
-
-  SDL_Rect rootRectangle = {0, 0, 0, 0};
-  rootRectangle.w        = windowSurface->w;
-  rootRectangle.h        = windowSurface->h;
-  this->rootElement      = std::make_unique<Container>(rootRectangle);
 
   const char* cancelPromptContent    = "Are you sure you want to cancel the scan?";
   SDL_Color cancelPromptColor        = {0, 255, 0, 255}; // Green
@@ -56,4 +48,10 @@ void CancelScanConfirmation::render() const {
   SDL_RenderClear(this->displayGlobal.renderer);
   this->rootElement->render();
   SDL_RenderPresent(this->displayGlobal.renderer);
+}
+
+void CancelScanConfirmation::exit() {
+  if (this->currentState == EngineState::ITEM_LIST) {
+    this->displayHandler.scanCancelledToVision();
+  }
 }

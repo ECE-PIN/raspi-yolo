@@ -102,3 +102,20 @@ void CompositeElement::checkCollision(std::vector<SDL_Rect>& boundaryRectangles)
     element->checkCollision(boundaryRectangles);
   }
 }
+
+/**
+ * Remove all child elements from this composite element.
+ * This will destroy elements if this composite holds the last reference.
+ *
+ * @param None
+ * @return None
+ */
+void CompositeElement::removeAllChildren() {
+  for (auto& child : this->children) {
+    if (child) {
+      child->setParent(nullptr);
+    }
+  }
+
+  this->children.clear();
+}

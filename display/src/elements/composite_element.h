@@ -16,6 +16,7 @@ public:
   void handleEvent(const SDL_Event& event) override;
   void addBoundaryRectangle(std::vector<SDL_Rect>& boundaryRectangles) const override;
   void checkCollision(std::vector<SDL_Rect>& boundaryRectangles) override;
+  void removeAllChildren();
 
 protected:
   virtual void updateSelf();

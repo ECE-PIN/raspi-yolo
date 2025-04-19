@@ -13,9 +13,10 @@
  */
 class ItemList : public State {
 public:
-  ItemList(struct DisplayGlobal displayGlobal);
-  EngineState checkKeystates();
+  ItemList(const DisplayGlobal& displayGlobal, const EngineState& state);
+  void handleEvents(bool* displayIsRunning) override;
   void render() const override;
+  void exit() override;
 
 private:
   Logger logger;

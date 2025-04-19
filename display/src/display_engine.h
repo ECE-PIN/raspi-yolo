@@ -12,6 +12,7 @@
 
 #include "states/cancel_scan_confirmation.h"
 #include "states/item_list.h"
+#include "states/scan_success.h"
 #include "states/scanning.h"
 #include "states/zero_weight.h"
 
@@ -28,6 +29,21 @@ public:
                 int screenHeight,
                 bool fullscreen,
                 const zmqpp::context& context);
+  void start();
+
+private:
+  Logger logger;
+  struct DisplayGlobal displayGlobal;
+  State* engineState       = nullptr;
+  EngineState currentState = EngineState::ITEM_LIST;
+  bool displayIsRunning    = false;
+
+  // States
+  std::unique_ptr<Scanning> scanning;
+  std::unique_ptr<ItemList> itemList;
+  std::unique_ptr<ZeroWeight> zeroWeight;
+  std::unique_ptr<CancelScanConfirmation> cancelScanConfirmation;
+  std::unique_ptr<ScanSuccess> scanSuccess;
 
   SDL_Window* setupWindow(const char* windowTitle,
                           int windowXPosition,
@@ -37,37 +53,11 @@ public:
                           bool fullscreen);
   void initializeEngine(SDL_Window* window);
 
-  void start();
-
-  void checkState();
+  void handleStateChange();
   void handleEvents();
-  void checkKeystates();
   void update();
-
   void renderState();
   void clean();
-
-private:
-  Logger logger;
-  DisplayHandler displayHandler;
-  struct DisplayGlobal displayGlobal;
-  EngineState engineState = EngineState::ITEM_LIST;
-  bool displayIsRunning   = false;
-
-  // States
-  std::unique_ptr<Scanning> scanning;
-  std::unique_ptr<ItemList> itemList;
-  std::unique_ptr<ZeroWeight> zeroWeight;
-  std::unique_ptr<CancelScanConfirmation> cancelScanConfirmation;
-
-  void checkScanning();
-  void checkItemList();
-  void checkZeroWeight();
-  void checkCancelScanConfirmation();
-
-  void startToHardware();
-  void zeroWeightChoiceToHardware(const std::string& zeroWeightChoice);
-  void scanCancelledToVision();
 };
 
 #endif
