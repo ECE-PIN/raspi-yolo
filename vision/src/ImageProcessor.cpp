@@ -182,8 +182,8 @@ void ImageProcessor::stopHardware() {
       this->logger.log("Hardware requested retransmission");
     }
     else {
-      this->logger.log("Received invalid message from hardware");
-      LOG(FATAL) << "Received invalid message from hardware";
+      this->logger.log("Received invalid message from hardware: " + response);
+      LOG(FATAL) << "Received invalid message from hardware: " << response;
     }
   }
 }
