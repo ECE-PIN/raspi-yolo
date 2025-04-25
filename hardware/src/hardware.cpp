@@ -293,7 +293,7 @@ float Hardware::sendCommand(char commandChar) {
   serialFlush(arduino_fd);
   serialPutchar(arduino_fd, commandChar);
 
-  char response[64];
+  this->logger.log("Size of response buffer: " + std::to_string(sizeof(response)));
   readLineFromArduino(response, sizeof(response));
 
   switch (commandChar) {
