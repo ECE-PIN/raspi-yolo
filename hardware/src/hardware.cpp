@@ -386,11 +386,13 @@ void Hardware::rotateAndCapture() {
  */
 bool Hardware::takePhotos(int angle) {
   this->logger.log("Taking photos at position: " + std::to_string(angle));
-  const std::string cmd0 = "rpicam-jpeg --camera 0";
-  const std::string cmd1 = "rpicam-jpeg --camera 1";
-  const std::string np   = " --nopreview";
-  const std::string res  = " --width 4608 --height 2592";
-  const std::string out  = " --output ";
+  const std::string cmd0    = "rpicam-jpeg --camera 0";
+  const std::string cmd1    = "rpicam-jpeg --camera 1";
+  const std::string np      = " --nopreview";
+  const std::string res     = " --width 4608 --height 2592";
+  const std::string horFlip = " --hflip"; // If text is backwards
+  const std::string verFlip = " --vflip"; // If text is upside down
+  const std::string out     = " --output ";
   const std::string to = " --timeout 50"; // DO NOT SET TO 0! Will cause infinite preview!
   const std::string topPhoto =
       this->imageDirectory.string() + std::to_string(angle) + "_top.jpg";
