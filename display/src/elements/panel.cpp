@@ -169,8 +169,12 @@ void Panel::addFoodItemWeight(const FoodItem& foodItem,
 
   addText(fontPath, " Wt: ", fontSize, textColor, relativePosition);
 
-  std::string weight = std::to_string(foodItem.getWeight());
-  addText(fontPath, weight, fontSize, textColor, relativePosition);
+  float weight        = foodItem.getWeight();
+  int precision       = 2;
+  float multiplier    = std::pow(10.0f, precision);
+  float roundedWeight = std::round(weight * multiplier) / multiplier;
+
+  addText(fontPath, std::to_string(roundedWeight), fontSize, textColor, relativePosition);
 
   addText(fontPath, this->WEIGHT_UNITS, fontSize, textColor, relativePosition);
 }

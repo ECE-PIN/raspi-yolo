@@ -1,4 +1,3 @@
-#include <cmath>
 #include <errno.h>
 #include <filesystem>
 #include <fstream>
@@ -20,9 +19,8 @@ Hardware::Hardware(zmqpp::context& context, bool usingMotor, bool usingCamera)
     : logger("hardware_log.txt"),
       requestVisionSocket(context, zmqpp::socket_type::request),
       requestDisplaySocket(context, zmqpp::socket_type::request),
-      replySocket(context, zmqpp::socket_type::reply),
-      // imageDirectory(std::filesystem::current_path() / "tmp/images/"),
-      usingMotor(usingMotor), usingCamera(usingCamera) {
+      replySocket(context, zmqpp::socket_type::reply), usingMotor(usingMotor),
+      usingCamera(usingCamera) {
   if (this->usingCamera) {
     this->imageDirectory = std::filesystem::current_path() / "tmp/images/";
 
@@ -125,7 +123,6 @@ bool Hardware::checkStartSignal(int timeoutMs) {
           bool validWeight = checkValidWeight();
 
           if (validWeight) {
-            this->itemWeight = ceil(this->itemWeight * 100) / 100;
             this->logger.log("Non-zero weight on platform: " +
                              std::to_string(this->itemWeight));
             receivedRequest = true;
