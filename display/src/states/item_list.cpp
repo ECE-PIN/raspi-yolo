@@ -47,7 +47,7 @@ ItemList::ItemList(const DisplayGlobal& displayGlobal, const EngineState& state)
 
   // Dropdown
   std::shared_ptr<Dropdown> sortBy = std::make_shared<Dropdown>(
-      this->displayGlobal, this->logFile, SDL_Rect{450, 0, 0, 0}, "Sort by:");
+      this->displayGlobal, this->logFile, SDL_Rect{550, 0, 0, 0}, "Sort by:");
 
   std::shared_ptr<Button> sortByExpirationLowToHigh = std::make_shared<Button>(
       this->displayGlobal, this->logFile, SDL_Rect{0, 0, 0, 0},
