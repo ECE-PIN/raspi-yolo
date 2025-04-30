@@ -43,7 +43,7 @@ private:
   int readLineFromArduino(char* buffer, int maxLen);
 
   std::string getZeroWeightResponse();
-  bool checkValidWeight(float weight);
+  bool checkValidWeight();
 
   void rotateAndCapture();
   bool takePhotos(int angle);

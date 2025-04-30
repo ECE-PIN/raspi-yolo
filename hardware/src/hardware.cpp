@@ -56,16 +56,12 @@ void Hardware::initDC() {
   // Uses BCM numbering of the GPIOs and directly accesses the GPIO registers.
   wiringPiSetupPinType(WPI_PIN_BCM);
 
-  this->logger.log("Motor System Initialization");
   // Setup DC Motor Driver Pins
+  this->logger.log("Motor System Initialization");
   pinMode(MOTOR_IN1, OUTPUT);
   pinMode(MOTOR_IN2, OUTPUT);
-  // Frequency and pulse break ratio can be configured
-  // pinMode(MOTOR_ENA, PWM_MS_OUTPUT);
-
   digitalWrite(MOTOR_IN1, LOW);
   digitalWrite(MOTOR_IN2, LOW);
-  // pwmWrite(MOTOR_ENA, ###);
 
   this->logger.log("Motor System Initialized.");
 }
@@ -122,13 +118,14 @@ bool Hardware::checkStartSignal(int timeoutMs) {
                            ", checking weight");
 
           // Discard first weight then read
-          float weight = sendCommand(this->READ_WEIGHT);
-          weight       = sendCommand(this->READ_WEIGHT);
+          sendCommand(this->READ_WEIGHT);
+          this->itemWeight = sendCommand(this->READ_WEIGHT);
 
-          bool validWeight = checkValidWeight(weight);
+          bool validWeight = checkValidWeight();
 
           if (validWeight) {
-            this->logger.log("Non-zero weight on platform: " + std::to_string(weight));
+            this->logger.log("Non-zero weight on platform: " +
+                             std::to_string(this->itemWeight));
             receivedRequest = true;
             nonzeroWeight   = true;
             this->replySocket.send(Messages::AFFIRMATIVE); // Respond to display
@@ -475,8 +472,8 @@ std::string Hardware::getZeroWeightResponse() {
   return zeroWeightResponse;
 }
 
-bool Hardware::checkValidWeight(float weight) {
-  if (weight < 0.0 || weight < 0.5) {
+bool Hardware::checkValidWeight() {
+  if (this->itemWeight < 0.0 || this->itemWeight < 0.5) {
     return false;
   }
   else {
