@@ -32,7 +32,7 @@ ItemList::ItemList(const DisplayGlobal& displayGlobal, const EngineState& state)
   rootElement->addElement(std::move(newScanButton));
 
   // Scrollbox
-  SDL_Rect scrollBoxRect = {0, 0, 400, 100};
+  SDL_Rect scrollBoxRect = {0, 0, 600, 0};
   int windowWidth, windowHeight;
   SDL_GetWindowSize(this->displayGlobal.window, &windowWidth, &windowHeight);
   scrollBoxRect.h = windowHeight - 1;

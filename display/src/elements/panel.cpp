@@ -167,6 +167,8 @@ void Panel::addFoodItemWeight(const FoodItem& foodItem,
   int fontSize         = 24;
   SDL_Color textColor  = {0, 255, 0, 255}; // Green
 
+  addText(fontPath, "Wt: ", fontSize, textColor, relativePosition);
+
   std::string weight = std::to_string(foodItem.getWeight());
   addText(fontPath, weight, fontSize, textColor, relativePosition);
 }
