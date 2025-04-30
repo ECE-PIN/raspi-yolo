@@ -150,12 +150,9 @@ void setFoodItem(FoodItem& foodItem,
         expirationDate.year(), expirationDate.month(),
         std::chrono::day{static_cast<unsigned>(stoi(columnValue))}));
   }
-  // Weight not currently being used in any parts of the display but may want to add later
-  /*
-  else if (std::string(columnNames[i]) == "weight") {
-    foodItem.weight = columns[i];
+  else if (columnName == "weight") {
+    foodItem.setWeight(stof(columnValue));
   }
-  */
   else if (columnName == "quantity") {
     foodItem.setQuantity(stoi(columnValue));
   }
