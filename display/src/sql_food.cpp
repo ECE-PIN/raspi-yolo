@@ -151,7 +151,9 @@ void setFoodItem(FoodItem& foodItem,
         std::chrono::day{static_cast<unsigned>(stoi(columnValue))}));
   }
   else if (columnName == "weight") {
-    foodItem.setWeight(stof(columnValue));
+    float weight        = stof(columnValue);
+    float roundedWeight = weight * 100 / 100;
+    foodItem.setWeight(roundedWeight);
   }
   else if (columnName == "quantity") {
     foodItem.setQuantity(stoi(columnValue));
