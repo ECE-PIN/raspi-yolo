@@ -112,12 +112,23 @@ void ScrollBox::setSortMethod(SortMethod sortMethod) {
 void ScrollBox::refreshPanels() {
   std::vector<FoodItem> allFoodItems = readAllFoodItemsSorted(this->sortMethod);
 
+  int longestName = 0;
+  for (auto& foodItem : allFoodItems) {
+    std::string name = foodItem.getName();
+    int nameLength   = name.length();
+
+    if (nameLength > longestName) {
+      longestName = nameLength;
+    }
+  }
+
   this->children.clear();
   SDL_Rect boundaryRectangle = {0, topPanelPosition, 0, this->panelHeight};
 
   for (auto& foodItem : allFoodItems) {
-    std::shared_ptr<Panel> newPanel = std::make_shared<Panel>(
-        this->displayGlobal, this->logFile, boundaryRectangle, foodItem.getId());
+    std::shared_ptr<Panel> newPanel =
+        std::make_shared<Panel>(this->displayGlobal, this->logFile, boundaryRectangle,
+                                foodItem.getId(), longestName);
     boundaryRectangle.y += panelHeight;
 
     newPanel->addFoodItem(foodItem, SDL_Point{0, 0});

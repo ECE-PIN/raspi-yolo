@@ -23,7 +23,8 @@ public:
   Panel(const struct DisplayGlobal& displayGlobal,
         const std::string& logFile,
         const SDL_Rect boundaryRectangle,
-        const int id);
+        const int id,
+        const int spacing);
 
   void setId(const int id);
 
@@ -40,6 +41,8 @@ public:
 private:
   int id                        = -1;
   const std::string WEIGHT_UNIT = "lbs";
+
+  int spacing;
 
   void addFoodItemName(const FoodItem& foodItem, const SDL_Point& relativePosition);
   void addFoodItemExpirationDate(const FoodItem& foodItem,

@@ -41,8 +41,8 @@ ScanSuccess::ScanSuccess(const struct DisplayGlobal& displayGlobal,
   this->rootElement->addElement(noButton);
 
   SDL_Rect boundaryRectangle = {0, 150, 600, 30};
-  this->scannedItemPanel =
-      std::make_shared<Panel>(this->displayGlobal, this->logFile, boundaryRectangle, -1);
+  this->scannedItemPanel     = std::make_shared<Panel>(this->displayGlobal, this->logFile,
+                                                   boundaryRectangle, -1, 0);
   this->scannedItemPanel->setCenteredHorizontal();
   this->scannedItemPanel->addBorder(1);
   this->rootElement->addElement(scannedItemPanel);

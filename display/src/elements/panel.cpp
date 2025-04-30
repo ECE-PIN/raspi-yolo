@@ -21,8 +21,10 @@
 Panel::Panel(const struct DisplayGlobal& displayGlobal,
              const std::string& logFile,
              const SDL_Rect boundaryRectangle,
-             const int id)
-    : CompositeElement(displayGlobal, logFile, boundaryRectangle), id(id) {}
+             const int id,
+             const int spacing)
+    : CompositeElement(displayGlobal, logFile, boundaryRectangle), id(id),
+      spacing(spacing) {}
 
 /**
  * Set a new id. Updates information within the panel according to the new id.
@@ -119,7 +121,12 @@ void Panel::addFoodItemName(const FoodItem& foodItem, const SDL_Point& relativeP
   int fontSize         = 24;
   SDL_Color textColor  = {0, 255, 0, 255}; // Green
 
-  addText(fontPath, foodItem.getName(), fontSize, textColor, relativePosition);
+  std::string name = foodItem.getName();
+  addText(fontPath, name, fontSize, textColor, relativePosition);
+  int spaces = this->spacing - name.length();
+  for (int i = 0; i < spaces; i++) {
+    addText(fontPath, " ", fontSize, textColor, relativePosition);
+  }
 }
 
 /**
