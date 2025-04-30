@@ -64,7 +64,11 @@ void NumberSetting::updateSelf() {
   // TODO change to range based for loop
   for (int i = 0; i < this->children.size(); i++) {
     SDL_Point childRelativePosition = this->children[i]->getPositionRelativeToParent();
-    childRelativePosition.y         = this->positionRelativeToParent.y;
+
+    SDL_Rect childBoundaryRect = this->children[i]->getBoundaryRectangle();
+    this->boundaryRectangle.w += childBoundaryRect.w;
+
+    childRelativePosition.y = this->positionRelativeToParent.y;
     if (i == 0) {
       childRelativePosition.x = 0;
     }
@@ -72,8 +76,7 @@ void NumberSetting::updateSelf() {
       SDL_Point leftRelativePosition =
           this->children[i - 1]->getPositionRelativeToParent();
       SDL_Rect leftBoundaryRectangle = this->children[i - 1]->getBoundaryRectangle();
-      this->boundaryRectangle.w += leftBoundaryRectangle.w;
-      childRelativePosition.x = leftRelativePosition.x + leftBoundaryRectangle.w;
+      childRelativePosition.x        = leftRelativePosition.x + leftBoundaryRectangle.w;
     }
     this->children[i]->setPositionRelativeToParent(childRelativePosition);
   }
@@ -87,11 +90,6 @@ void NumberSetting::updateSelf() {
     else if (foodItemQuantity != this->settingValue) {
       updateFoodItemQuantity(this->settingId, this->settingValue);
     }
-    /*
-    else {
-      this->children[1]->setContent(std::to_string(this->settingValue));
-    }
-  */
   }
   this->children[1]->setContent(std::to_string(this->settingValue));
 }
