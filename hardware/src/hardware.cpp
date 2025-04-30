@@ -1,4 +1,14 @@
+#include <errno.h>
+#include <filesystem>
+#include <fstream>
+#include <glog/logging.h>
+#include <iostream>
+#include <string>
+#include <unistd.h>
+#include <wiringPi.h>
+
 #include "hardware.h"
+#include "wiringSerial.h"
 
 /**
  * @param context The zeroMQ context with which to creates with
@@ -110,7 +120,7 @@ bool Hardware::checkStartSignal(int timeoutMs) {
 
           this->logger.log("Received start signal from display, checking weight");
 
-          nonzeroWeight = (bool)hardware.sendCommand('4');
+          nonzeroWeight = (bool)this->sendCommand('4');
           if (nonzeroWeight == false) {
             this->logger.log("Informing display that no weight detected on plaform");
             this->replySocket.send(Messages::ZERO_WEIGHT);
@@ -278,12 +288,12 @@ int Hardware::readLineFromArduino(char* buffer, int maxLen) {
  *  @return 4 -> 1 - weight present || 0 - no weight
  *  @return The response from the Arduino.
  */
-float sendCommand(char commandChar) {
+float Hardware::sendCommand(char commandChar) {
   this->logger.log("Sending command to Arduino: " + std::string(1, commandChar));
   serialFlush(arduino_fd);
   serialPutchar(arduino_fd, commandChar);
 
-  char response[64];
+  this->logger.log("Size of response buffer: " + std::to_string(sizeof(response)));
   readLineFromArduino(response, sizeof(response));
 
   switch (commandChar) {
@@ -403,7 +413,7 @@ bool Hardware::takePhotos(int angle) {
       this->imageDirectory.string() + std::to_string(angle) + "_side.jpg";
 
   const std::string command0 = cmd0 + np + res + out + topPhoto;
-  const std::string command1 = cmd0 + np + res + out + sidePhoto;
+  const std::string command1 = cmd1 + np + res + out + sidePhoto;
   system(command0.c_str());
   system(command1.c_str());
 

@@ -21,11 +21,6 @@ void hardwareEntry(zmqpp::context& context, bool usingMotor, bool usingCamera) {
   if (usingMotor) {
     hardware.initDC();
   }
-  //  TODO - Setup communication with Arduino for weight.
-  Hardware hardware(context);
-  bool startSignalReceived = false;
-  int startSignalTimeoutMs = 1000;
-  hardware.initDC();
   hardware.initSerialConnection(hardware.SerialDevice, hardware.baud);
 
   while (1) {
