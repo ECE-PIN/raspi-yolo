@@ -174,7 +174,12 @@ void Panel::addFoodItemWeight(const FoodItem& foodItem,
   float multiplier    = std::pow(10.0f, precision);
   float roundedWeight = std::round(weight * multiplier) / multiplier;
 
-  addText(fontPath, std::to_string(roundedWeight), fontSize, textColor, relativePosition);
+  char removeZerosBuffer[100];
+  sprintf(removeZerosBuffer, "%g",
+          roundedWeight); // %g automatically removes trailing zeros
+  std::string roundedWeightNoZeros = removeZerosBuffer; // "3.14"
+
+  addText(fontPath, roundedWeightNoZeros, fontSize, textColor, relativePosition);
 
   addText(fontPath, this->WEIGHT_UNITS, fontSize, textColor, relativePosition);
 }
