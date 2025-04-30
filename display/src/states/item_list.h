@@ -21,6 +21,8 @@ public:
 private:
   SDL_Point mousePosition;
   std::shared_ptr<Mediator> mediator;
+
+  const int SCROLLBOX_WIDTH = 600;
 };
 
 #endif

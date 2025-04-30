@@ -23,16 +23,16 @@ ItemList::ItemList(const DisplayGlobal& displayGlobal, const EngineState& state)
   this->mediator = std::make_shared<Mediator>(LogFiles::ITEM_LIST);
 
   // Start Scan
-  SDL_Rect newScanButtonRectangle       = {200, 150, 200, 50};
+  SDL_Rect newScanButtonRectangle       = {this->SCROLLBOX_WIDTH + 10, 0, 200, 50};
   std::shared_ptr<Button> newScanButton = std::make_shared<Button>(
       this->displayGlobal, this->logFile, newScanButtonRectangle, "Scan New Item",
       SDL_Point{10, 10},
       [this]() { this->currentState = this->displayHandler.startToHardware(); });
-  newScanButton->setCenteredHorizontal();
+  newScanButton->setCenteredVertical();
   rootElement->addElement(std::move(newScanButton));
 
   // Scrollbox
-  SDL_Rect scrollBoxRect = {0, 0, 600, 0};
+  SDL_Rect scrollBoxRect = {0, 0, this->SCROLLBOX_WIDTH, 0};
   int windowWidth, windowHeight;
   SDL_GetWindowSize(this->displayGlobal.window, &windowWidth, &windowHeight);
   scrollBoxRect.h = windowHeight - 1;
@@ -47,7 +47,8 @@ ItemList::ItemList(const DisplayGlobal& displayGlobal, const EngineState& state)
 
   // Dropdown
   std::shared_ptr<Dropdown> sortBy = std::make_shared<Dropdown>(
-      this->displayGlobal, this->logFile, SDL_Rect{550, 0, 0, 0}, "Sort by:");
+      this->displayGlobal, this->logFile, SDL_Rect{this->SCROLLBOX_WIDTH + 10, 0, 0, 0},
+      "Sort by:");
 
   std::shared_ptr<Button> sortByExpirationLowToHigh = std::make_shared<Button>(
       this->displayGlobal, this->logFile, SDL_Rect{0, 0, 0, 0},
