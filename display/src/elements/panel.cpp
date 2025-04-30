@@ -181,5 +181,5 @@ void Panel::addFoodItemWeight(const FoodItem& foodItem,
 
   addText(fontPath, roundedWeightNoZeros, fontSize, textColor, relativePosition);
 
-  addText(fontPath, this->WEIGHT_UNITS, fontSize, textColor, relativePosition);
+  addText(fontPath, this->WEIGHT_UNIT, fontSize, textColor, relativePosition);
 }

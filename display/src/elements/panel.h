@@ -38,8 +38,8 @@ public:
   void handleEventSelf(const SDL_Event& event) override;
 
 private:
-  int id                         = -1;
-  const std::string WEIGHT_UNITS = "lbs";
+  int id                        = -1;
+  const std::string WEIGHT_UNIT = "lbs";
 
   void addFoodItemName(const FoodItem& foodItem, const SDL_Point& relativePosition);
   void addFoodItemExpirationDate(const FoodItem& foodItem,
