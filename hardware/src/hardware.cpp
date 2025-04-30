@@ -124,6 +124,7 @@ bool Hardware::checkStartSignal(int timeoutMs) {
           bool validWeight = checkValidWeight();
 
           if (validWeight) {
+            this->itemWeight = this->itemWeight * 100 / 100;
             this->logger.log("Non-zero weight on platform: " +
                              std::to_string(this->itemWeight));
             receivedRequest = true;
