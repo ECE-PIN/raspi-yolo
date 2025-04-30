@@ -126,9 +126,8 @@ void ScrollBox::refreshPanels() {
   SDL_Rect boundaryRectangle = {0, topPanelPosition, 0, this->panelHeight};
 
   for (auto& foodItem : allFoodItems) {
-    std::shared_ptr<Panel> newPanel =
-        std::make_shared<Panel>(this->displayGlobal, this->logFile, boundaryRectangle,
-                                foodItem.getId(), longestName);
+    std::shared_ptr<Panel> newPanel = std::make_shared<Panel>(
+        this->displayGlobal, this->logFile, boundaryRectangle, foodItem.getId(), 0);
     boundaryRectangle.y += panelHeight;
 
     newPanel->addFoodItem(foodItem, SDL_Point{0, 0});

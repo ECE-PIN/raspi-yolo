@@ -121,12 +121,7 @@ void Panel::addFoodItemName(const FoodItem& foodItem, const SDL_Point& relativeP
   int fontSize         = 24;
   SDL_Color textColor  = {0, 255, 0, 255}; // Green
 
-  std::string name = foodItem.getName();
-  addText(fontPath, name, fontSize, textColor, relativePosition);
-  int spaces = this->spacing - name.length();
-  for (int i = 0; i < spaces; i++) {
-    addText(fontPath, " ", fontSize, textColor, relativePosition);
-  }
+  addText(fontPath, foodItem.getName(), fontSize, textColor, relativePosition);
 }
 
 /**
