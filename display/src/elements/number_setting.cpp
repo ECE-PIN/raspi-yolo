@@ -60,6 +60,7 @@ void NumberSetting::updateSelf() {
     hasParentUpdate();
   }
 
+  this->boundaryRectangle.w = 0;
   // TODO change to range based for loop
   for (int i = 0; i < this->children.size(); i++) {
     SDL_Point childRelativePosition = this->children[i]->getPositionRelativeToParent();
@@ -71,7 +72,8 @@ void NumberSetting::updateSelf() {
       SDL_Point leftRelativePosition =
           this->children[i - 1]->getPositionRelativeToParent();
       SDL_Rect leftBoundaryRectangle = this->children[i - 1]->getBoundaryRectangle();
-      childRelativePosition.x        = leftRelativePosition.x + leftBoundaryRectangle.w;
+      this->boundaryRectangle.w += leftBoundaryRectangle.w;
+      childRelativePosition.x = leftRelativePosition.x + leftBoundaryRectangle.w;
     }
     this->children[i]->setPositionRelativeToParent(childRelativePosition);
   }
