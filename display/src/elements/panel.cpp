@@ -74,6 +74,8 @@ void Panel::addFoodItem(const FoodItem& foodItem, const SDL_Point& relativePosit
   std::shared_ptr<NumberSetting> itemQuantity = std::make_shared<NumberSetting>(
       this->displayGlobal, this->logFile, SDL_Rect{0, 0, 0, 0}, this->id);
   addElement(std::move(itemQuantity));
+
+  addFoodItemWeight(foodItem, relativePosition);
 }
 
 /**
@@ -157,4 +159,14 @@ void Panel::addFoodItemExpirationDate(const FoodItem& foodItem,
   std::string expirationDateYear =
       std::to_string(static_cast<int>(expirationDate.year()));
   addText(fontPath, expirationDateYear, fontSize, textColor, relativePosition);
+}
+
+void Panel::addFoodItemWeight(const FoodItem& foodItem,
+                              const SDL_Point& relativePosition) {
+  std::string fontPath = this->displayGlobal.futuramFontPath;
+  int fontSize         = 24;
+  SDL_Color textColor  = {0, 255, 0, 255}; // Green
+
+  std::string weight = std::to_string(foodItem.getWeight());
+  addText(fontPath, weight, fontSize, textColor, relativePosition);
 }

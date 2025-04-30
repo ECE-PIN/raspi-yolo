@@ -43,6 +43,7 @@ private:
   void addFoodItemName(const FoodItem& foodItem, const SDL_Point& relativePosition);
   void addFoodItemExpirationDate(const FoodItem& foodItem,
                                  const SDL_Point& relativePosition);
+  void addFoodItemWeight(const FoodItem& foodItem, const SDL_Point& relativePosition);
 };
 
 #endif
